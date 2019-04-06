@@ -1,88 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout android:layout_height="match_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_centerVertical="true"
-    android:layout_centerHorizontal="true"
-    >
 
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
 
-    <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+    <RelativeLayout android:layout_height="match_parent"
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:id="@+id/rg_radio_buttons"
-       >
-        <RadioButton android:id="@+id/rb_walking"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true">
+
+        <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/rg_radio_buttons"
+            >
+            <RadioButton android:id="@+id/rb_walking"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/walking" />
+            <RadioButton android:id="@+id/rb_walking_downstairs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/walking_downstairs" />
+            <RadioButton android:id="@+id/sitting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sitting" />
+            <RadioButton android:id="@+id/walking_upstairs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/walking_upstairs" />
+            <RadioButton android:id="@+id/laying"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/laying" />
+        </RadioGroup>
+
+
+        <Button
+            android:layout_marginTop="50sp"
+            android:id="@+id/btn_start_collect"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="@string/start_collect"
+            android:layout_below="@+id/rg_radio_buttons" />
+
+        <Button
+            android:layout_marginTop="10sp"
+            android:id="@+id/btn_stop_collect"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="@string/stop_collect"
+            android:layout_below="@+id/btn_start_collect" />
+
+        <Button
+            android:layout_marginTop="10sp"
+            android:id="@+id/btn_send_data"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="@string/send_data"
+            android:layout_below="@+id/btn_stop_collect" />
+
+        <TextView
+            android:layout_marginTop="10sp"
+            android:id="@+id/tv_info_gyroscope"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_below="@+id/btn_send_data" />
+        <TextView
+            android:layout_marginTop="10sp"
+            android:id="@+id/tv_info_gps"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_below="@+id/tv_info_gyroscope" />
+
+        <CheckBox android:id="@+id/ck_auto_mode"
+            android:layout_marginTop="10sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/walking" />
-        <RadioButton android:id="@+id/rb_walking_downstairs"
-            android:layout_width="wrap_content"
+            android:text="@string/auto_mode"
+            android:layout_below="@+id/tv_info_gps"/>
+
+        <TextView
+            android:layout_marginTop="10sp"
+            android:id="@+id/tv_info_sensors"
             android:layout_height="wrap_content"
-            android:text="@string/walking_downstairs" />
-        <RadioButton android:id="@+id/sitting"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sitting" />
-        <RadioButton android:id="@+id/walking_upstairs"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/walking_upstairs" />
-        <RadioButton android:id="@+id/laying"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/laying" />
-    </RadioGroup>
+            android:layout_below="@+id/ck_auto_mode"
+            />
 
 
-    <Button
-        android:layout_marginTop="50sp"
-        android:id="@+id/btn_start_collect"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:text="@string/start_collect"
-        android:layout_below="@+id/rg_radio_buttons" />
+    </RelativeLayout>
 
-    <Button
-        android:layout_marginTop="10sp"
-        android:id="@+id/btn_stop_collect"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:text="@string/stop_collect"
-        android:layout_below="@+id/btn_start_collect" />
+</ScrollView>
 
-    <Button
-        android:layout_marginTop="10sp"
-        android:id="@+id/btn_send_data"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:text="@string/send_data"
-        android:layout_below="@+id/btn_stop_collect" />
-
-
-    <TextView
-        android:layout_marginTop="10sp"
-        android:id="@+id/tv_info_data"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_below="@+id/btn_send_data"
-        />
-
-    <CheckBox android:id="@+id/ck_auto_mode"
-        android:layout_marginTop="10sp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/auto_mode"
-        android:layout_below="@+id/tv_info_data"/>
-
-    <TextView
-        android:layout_marginTop="10sp"
-        android:id="@+id/tv_info_sensors"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_below="@+id/ck_auto_mode"
-        />
-
-
-</RelativeLayout>
