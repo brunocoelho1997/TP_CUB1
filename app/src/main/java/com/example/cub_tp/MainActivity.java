@@ -89,7 +89,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
     }
 
-
     private void defineSensors() {
 
         //if user doen't have permissions need to ask him

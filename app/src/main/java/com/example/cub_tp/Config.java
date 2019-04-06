@@ -9,6 +9,11 @@ public class Config {
     public static String FILENAME = "tmp";
     public static String FILE_EXTENSION = ".csv";
 
+    public static String FILENAME_SSID = "ssid";
+    public static String FILE_EXTENSION_SSID = ".bin";
+
+
+
 
     /*Below we have declared and defined the SFTP HOST, PORT, USER
                    and Local private key from where you will make connection */

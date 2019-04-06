@@ -29,7 +29,8 @@ public class GpsUtil {
         requestGPSUpdates(context);
     }
     public static void stopGpsListening(Context context){
-        locationManager.removeUpdates(locationListener);
+        if(locationManager != null)
+            locationManager.removeUpdates(locationListener);
         locationManager = null;
     }
 
