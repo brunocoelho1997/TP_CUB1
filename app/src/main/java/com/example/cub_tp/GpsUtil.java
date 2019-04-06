@@ -19,15 +19,20 @@ public class GpsUtil {
     // Define a listener that responds to location updates
     private static LocationListener locationListener;
 
-    public static void defineGPSSensor(Context context) {
-
+    public static void startGpsListening(Context context){
         // Acquire a reference to the system Location Manager
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        // Define a listener that responds to location updates
         locationListener = (LocationListener) getNewLocationListener(context);
+
+        // Define a listener that responds to location updates
         defineLastLocation(context);
         requestGPSUpdates(context);
     }
+    public static void stopGpsListening(Context context){
+        locationManager.removeUpdates(locationListener);
+        locationManager = null;
+    }
+
 
     private static LocationListener getNewLocationListener(final Context context) {
         return new LocationListener() {

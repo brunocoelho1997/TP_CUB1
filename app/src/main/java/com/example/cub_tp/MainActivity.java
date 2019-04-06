@@ -12,6 +12,7 @@ import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.RadioGroup;
@@ -27,6 +28,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private SensorManager sensorManager;
     private List<Sensor> deviceSensors;
     private Sensor gyroscope;
+    private float mLastX, mLastY, mLastZ; //used by gyroscope
+    private final float NOISE = (float) 2.0; //used by gyroscope
     private Sensor accelometer;
 
 
@@ -63,6 +66,27 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         //define onclick event to btn save to server
         //btnSaveToServer.setOnClickListener(new SaveToServerListener());
+
+        //start collection data
+        btnStartCollectData.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sensorManager.registerListener(MainActivity.this, gyroscope, SensorManager.SENSOR_DELAY_NORMAL);
+                GpsUtil.startGpsListening(v.getContext());
+            }
+        });
+
+        //stop collection data
+        btnStopCollectingData.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sensorManager.unregisterListener(MainActivity.this);
+                GpsUtil.stopGpsListening(v.getContext());
+
+                tvInfoGps.setText("");
+                tvInfoGyroscope.setText("");
+            }
+        });
     }
 
 
@@ -87,8 +111,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null){
             this.accelometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         }
-
-        GpsUtil.defineGPSSensor(getApplicationContext());
     }
 
     private void checkPermissions() {
@@ -129,23 +151,25 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         //applyLowPassFilter(linear_acceleration, event);
 
-
-        final float alpha = (float)0.8;
-        float[] gravity = new float[3];
-        float[] linear_acceleration = new float[3];
-        // Isolate the force of gravity with the low-pass filter.
-        gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0];
-        gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1];
-        gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2];
-
-        // Remove the gravity contribution with the high-pass filter.
-        linear_acceleration[0] = event.values[0] - gravity[0];
-        linear_acceleration[1] = event.values[1] - gravity[1];
-        linear_acceleration[2] = event.values[2] - gravity[2];
-
-
         if(event.sensor.getType() == Sensor.TYPE_GYROSCOPE)
-            tvInfoGyroscope.setText("Gyroscope: x= " + linear_acceleration[0] + " y= " + linear_acceleration[1] + " z= " + linear_acceleration[2]);
+        {
+            float x = event.values[0];
+            float y = event.values[1];
+            float z = event.values[2];
+
+            float deltaX = Math.abs(mLastX - x);
+            float deltaY = Math.abs(mLastY - y);
+            float deltaZ = Math.abs(mLastZ - z);
+            if (deltaX < NOISE) deltaX = (float)0.0;
+            if (deltaY < NOISE) deltaY = (float)0.0;
+            if (deltaZ < NOISE) deltaZ = (float)0.0;
+            mLastX = x;
+            mLastY = y;
+            mLastZ = z;
+
+
+        }
+            tvInfoGyroscope.setText("Gyroscope: x= " + mLastX + " y= " + mLastY + " z= " + mLastZ);
         //else if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
             //tvAccelometer.setText("Acccelometer: x= " + linear_acceleration[0] + " y= " + linear_acceleration[1] + " z= " + linear_acceleration[1]);
 
@@ -162,8 +186,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onResume() {
         super.onResume();
-        sensorManager.registerListener(this, gyroscope, SensorManager.SENSOR_DELAY_NORMAL);
-        sensorManager.registerListener(this, accelometer, SensorManager.SENSOR_DELAY_NORMAL);
+        //sensorManager.registerListener(this, gyroscope, SensorManager.SENSOR_DELAY_NORMAL);
+        //sensorManager.registerListener(this, accelometer, SensorManager.SENSOR_DELAY_NORMAL);
 
     }
 
