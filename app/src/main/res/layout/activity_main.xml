@@ -6,13 +6,30 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:orientation="vertical">
+        <RadioButton android:id="@+id/rb_walking"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/walking" />
+        <RadioButton android:id="@+id/rb_walking_downstairs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/walking_downstairs" />
+        <RadioButton android:id="@+id/sitting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sitting" />
+        <RadioButton android:id="@+id/walking_upstairs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/walking_upstairs" />
+        <RadioButton android:id="@+id/laying"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/laying" />
+    </RadioGroup>
 
 </android.support.constraint.ConstraintLayout>
