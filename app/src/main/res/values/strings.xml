@@ -5,4 +5,8 @@
     <string name="sitting">Sentar</string>
     <string name="walking_upstairs">Subir</string>
     <string name="laying">Descansar</string>
+    <string name="start_collect">Começar Recolha</string>
+    <string name="stop_collect">Parar Recolha</string>
+    <string name="send_data">Transferir Dados</string>
+    <string name="auto_mode">Modo Automático</string>
 </resources>
