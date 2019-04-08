@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
@@ -25,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     //----sensors
     private MySensorManager mySensorManager;
     private MyGps myGps;
+    public static UserActivity actualUserActivity;
 
     private FileManager fileManager;
 
@@ -37,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     public static Button btnStartCollectData;
     public static Button btnStopCollectingData;
     public static CheckBox ckAutoMode;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,6 +87,36 @@ public class MainActivity extends AppCompatActivity {
                 tvInfoGyroscope.setText("");
             }
         });
+
+
+        //define radio buttons group
+        rgGroupRadio.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+
+                RadioButton button = (RadioButton) group.findViewById(checkedId);
+
+                switch(button.getId()) {
+                    case R.id.rb_walking:
+                        actualUserActivity = UserActivity.WALKING;
+                        break;
+                    case R.id.rb_sitting:
+                        actualUserActivity = UserActivity.SITTING;
+                        break;
+                    case R.id.rb_walking_upstairs:
+                        actualUserActivity = UserActivity.WALKING_UPSTAIRS;
+                        break;
+                    case R.id.rb_walking_downstairs:
+                        actualUserActivity = UserActivity.WALKING_DOWNSTAIRS;
+                        break;
+                    case R.id.rb_laying:
+                        actualUserActivity = UserActivity.LAYING;
+                        break;
+                }
+            }
+        });
+
+        ((RadioButton)rgGroupRadio.getChildAt(0)).setChecked(true);
     }
 
     private void defineSensors() {

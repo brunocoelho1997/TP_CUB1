@@ -12,7 +12,7 @@ import android.widget.Toast;
 
 public class MyGps {
 
-    private double actualLongitude, actualLatitude;
+    private double actualLongitude, actualLatitude, actualAltitude;
 
     //----sensors
     // Acquire a reference to the system Location Manager
@@ -45,9 +45,11 @@ public class MyGps {
             public void onLocationChanged(final Location location) {
                 final double longitudeNetwork = location.getLongitude();
                 final double latitudeNetwork = location.getLatitude();
+                final double altitudeNetwork= location.getAltitude();
                 actualLatitude = latitudeNetwork;
                 actualLongitude = longitudeNetwork;
-                MainActivity.tvInfoGps.setText("GPS: " + longitudeNetwork + " - " + latitudeNetwork);
+                actualAltitude = altitudeNetwork;
+                MainActivity.tvInfoGps.setText("GPS: " + longitudeNetwork + ", " + latitudeNetwork);
                 Toast.makeText(context, "Network Provider update", Toast.LENGTH_SHORT).show();
 
                 //every time we get a new location we save on the file
@@ -94,5 +96,9 @@ public class MyGps {
 
     public double getActualLatitude() {
         return actualLatitude;
+    }
+
+    public double getActualAltitude() {
+        return actualAltitude;
     }
 }

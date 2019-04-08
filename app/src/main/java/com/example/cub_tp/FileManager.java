@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
 
@@ -15,7 +16,7 @@ import static com.example.cub_tp.Config.*;
 public class FileManager {
     private static String sessionId;
     private static MyGps myGps;
-    private MySensorManager mySensorManager;
+    private static MySensorManager mySensorManager;
 
     public FileManager(MyGps myGps, MySensorManager mySensorManager) {
         this.myGps = myGps;
@@ -48,7 +49,23 @@ public class FileManager {
 
         str += getSessionId();
         str += "," + myGps.getActualLatitude();
+        str += "," + myGps.getActualAltitude();
         str += "," + myGps.getActualLongitude();
+
+        str += "," + new Timestamp(System.currentTimeMillis());
+
+        str += "," + mySensorManager.getLastXAccelometer();
+        str += "," + mySensorManager.getLastYAccelometer();
+        str += "," + mySensorManager.getLastZAccelometer();
+
+        str += "," + mySensorManager.getmLastXGyroscope();
+        str += "," + mySensorManager.getmLastYGyroscope();
+        str += "," + mySensorManager.getmLastZGyroscope();
+
+        str += "," + MainActivity.actualUserActivity;
+
+
+
         str +="\n";
         return str;
     }

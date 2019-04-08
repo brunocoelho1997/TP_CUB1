@@ -1,6 +1,5 @@
 package com.example.cub_tp;
 
-import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -16,9 +15,12 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
     private SensorManager sensorManager;
     private List<Sensor> deviceSensors;
     private Sensor gyroscope;
-    private float mLastX, mLastY, mLastZ; //used by gyroscope
-    private final float NOISE = (float) 2.0; //used by gyroscope
     private Sensor accelometer;
+
+    private static float mLastXGyroscope, mLastYGyroscope, mLastZGyroscope; //used by gyroscope
+    private final float NOISE = (float) 2.0; //used by gyroscope
+
+    private static float lastXAccelometer, lastYAccelometer, lastZAccelometer;
 
     public MySensorManager(SensorManager sensorManager) {
 
@@ -42,6 +44,8 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
 
     public void startSensors(){
         sensorManager.registerListener(MySensorManager.this, gyroscope, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(MySensorManager.this, accelometer, SensorManager.SENSOR_DELAY_NORMAL);
+
     }
 
     public void stopSensors(){
@@ -60,21 +64,25 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
             float y = event.values[1];
             float z = event.values[2];
 
-            float deltaX = Math.abs(mLastX - x);
-            float deltaY = Math.abs(mLastY - y);
-            float deltaZ = Math.abs(mLastZ - z);
+            float deltaX = Math.abs(mLastXGyroscope - x);
+            float deltaY = Math.abs(mLastYGyroscope - y);
+            float deltaZ = Math.abs(mLastZGyroscope - z);
             if (deltaX < NOISE) deltaX = (float)0.0;
             if (deltaY < NOISE) deltaY = (float)0.0;
             if (deltaZ < NOISE) deltaZ = (float)0.0;
-            mLastX = x;
-            mLastY = y;
-            mLastZ = z;
+            mLastXGyroscope = x;
+            mLastYGyroscope = y;
+            mLastZGyroscope = z;
 
+            MainActivity.tvInfoGyroscope.setText("Gyroscope: x= " + mLastXGyroscope + " y= " + mLastYGyroscope + " z= " + mLastZGyroscope);
 
         }
-        MainActivity.tvInfoGyroscope.setText("Gyroscope: x= " + mLastX + " y= " + mLastY + " z= " + mLastZ);
-        //else if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
-        //tvAccelometer.setText("Acccelometer: x= " + linear_acceleration[0] + " y= " + linear_acceleration[1] + " z= " + linear_acceleration[1]);
+        else if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+        {
+            lastXAccelometer = event.values[0];
+            lastYAccelometer = event.values[1];
+            lastZAccelometer = event.values[2];
+        }
 
         FileManager.saveOnTxtFile();
     }
@@ -84,5 +92,29 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         // Do something here if sensor accuracy changes.
+    }
+
+    public static float getmLastXGyroscope() {
+        return mLastXGyroscope;
+    }
+
+    public static float getmLastYGyroscope() {
+        return mLastYGyroscope;
+    }
+
+    public static float getmLastZGyroscope() {
+        return mLastZGyroscope;
+    }
+
+    public static float getLastXAccelometer() {
+        return lastXAccelometer;
+    }
+
+    public static float getLastYAccelometer() {
+        return lastYAccelometer;
+    }
+
+    public static float getLastZAccelometer() {
+        return lastZAccelometer;
     }
 }
