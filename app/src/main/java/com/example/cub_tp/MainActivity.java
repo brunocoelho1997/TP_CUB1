@@ -7,8 +7,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,16 +20,13 @@ import java.util.List;
 
 import static com.example.cub_tp.Config.*;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener {
+public class MainActivity extends AppCompatActivity {
 
     //----sensors
-    private SensorManager sensorManager;
-    private List<Sensor> deviceSensors;
-    private Sensor gyroscope;
-    private float mLastX, mLastY, mLastZ; //used by gyroscope
-    private final float NOISE = (float) 2.0; //used by gyroscope
-    private Sensor accelometer;
+    private MySensorManager mySensorManager;
+    private MyGps myGps;
 
+    private FileManager fileManager;
 
     //layout vars
     public static RadioGroup rgGroupRadio;
@@ -49,6 +44,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         defineLayout();
         defineSensors();
+
+        this.fileManager = new FileManager(myGps,mySensorManager);
     }
 
     private void defineLayout() {
@@ -71,8 +68,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         btnStartCollectData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sensorManager.registerListener(MainActivity.this, gyroscope, SensorManager.SENSOR_DELAY_NORMAL);
-                GpsUtil.startGpsListening(v.getContext());
+                mySensorManager.startSensors();
+                myGps.startGpsListening(v.getContext());
             }
         });
 
@@ -80,9 +77,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         btnStopCollectingData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sensorManager.unregisterListener(MainActivity.this);
-                GpsUtil.stopGpsListening(v.getContext());
-
+                mySensorManager.stopSensors();
+                myGps.stopGpsListening(v.getContext());
+                FileManager.restartSessionId();
                 tvInfoGps.setText("");
                 tvInfoGyroscope.setText("");
             }
@@ -94,22 +91,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //if user doen't have permissions need to ask him
         checkPermissions(); //TODO: need to return boolean value;
 
-        //for sensors
-        this.sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        this.deviceSensors = sensorManager.getSensorList(Sensor.TYPE_ALL);
-        for(int i=0; i<deviceSensors.size();i++) {
-            this.tvSensorList.setText( this.tvSensorList.getText() + deviceSensors.get(i).getName() + "\n");
-        }
+        //define sensor manager
+        this.mySensorManager = new MySensorManager((SensorManager) getSystemService(Context.SENSOR_SERVICE));
 
-        //define Gyroscope
-        if (sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null){
-            this.gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-        }
-
-        //define Accelometer
-        if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null){
-            this.accelometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        }
+        //define GPS
+        this.myGps = new MyGps();
     }
 
     private void checkPermissions() {
@@ -144,47 +130,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         */
     }
 
-    //for gyroscope and accelometer
-    @Override
-    public void onSensorChanged(SensorEvent event) {
 
-        //applyLowPassFilter(linear_acceleration, event);
-
-        if(event.sensor.getType() == Sensor.TYPE_GYROSCOPE)
-        {
-            float x = event.values[0];
-            float y = event.values[1];
-            float z = event.values[2];
-
-            float deltaX = Math.abs(mLastX - x);
-            float deltaY = Math.abs(mLastY - y);
-            float deltaZ = Math.abs(mLastZ - z);
-            if (deltaX < NOISE) deltaX = (float)0.0;
-            if (deltaY < NOISE) deltaY = (float)0.0;
-            if (deltaZ < NOISE) deltaZ = (float)0.0;
-            mLastX = x;
-            mLastY = y;
-            mLastZ = z;
-
-
-        }
-            tvInfoGyroscope.setText("Gyroscope: x= " + mLastX + " y= " + mLastY + " z= " + mLastZ);
-        //else if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
-            //tvAccelometer.setText("Acccelometer: x= " + linear_acceleration[0] + " y= " + linear_acceleration[1] + " z= " + linear_acceleration[1]);
-
-        FileUtil.saveOnTxtFile();
-    }
-
-
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // Do something here if sensor accuracy changes.
-    }
 
     @Override
     protected void onResume() {
         super.onResume();
+        //just register listener when we click start button
         //sensorManager.registerListener(this, gyroscope, SensorManager.SENSOR_DELAY_NORMAL);
         //sensorManager.registerListener(this, accelometer, SensorManager.SENSOR_DELAY_NORMAL);
 
@@ -193,6 +144,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onPause() {
         super.onPause();
-        sensorManager.unregisterListener(this);
+        mySensorManager.stopSensors();
     }
 }

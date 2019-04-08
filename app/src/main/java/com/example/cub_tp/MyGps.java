@@ -3,7 +3,6 @@ package com.example.cub_tp;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -11,7 +10,9 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.widget.Toast;
 
-public class GpsUtil {
+public class MyGps {
+
+    private double actualLongitude, actualLatitude;
 
     //----sensors
     // Acquire a reference to the system Location Manager
@@ -19,7 +20,11 @@ public class GpsUtil {
     // Define a listener that responds to location updates
     private static LocationListener locationListener;
 
-    public static void startGpsListening(Context context){
+    public MyGps() {
+        //do nothing.
+    }
+
+    public void startGpsListening(Context context){
         // Acquire a reference to the system Location Manager
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         locationListener = (LocationListener) getNewLocationListener(context);
@@ -28,24 +33,25 @@ public class GpsUtil {
         defineLastLocation(context);
         requestGPSUpdates(context);
     }
-    public static void stopGpsListening(Context context){
+    public void stopGpsListening(Context context){
         if(locationManager != null)
             locationManager.removeUpdates(locationListener);
         locationManager = null;
     }
 
-
-    private static LocationListener getNewLocationListener(final Context context) {
+    private LocationListener getNewLocationListener(final Context context) {
         return new LocationListener() {
 
             public void onLocationChanged(final Location location) {
                 final double longitudeNetwork = location.getLongitude();
                 final double latitudeNetwork = location.getLatitude();
+                actualLatitude = latitudeNetwork;
+                actualLongitude = longitudeNetwork;
                 MainActivity.tvInfoGps.setText("GPS: " + longitudeNetwork + " - " + latitudeNetwork);
                 Toast.makeText(context, "Network Provider update", Toast.LENGTH_SHORT).show();
 
                 //every time we get a new location we save on the file
-                FileUtil.saveOnTxtFile();
+                FileManager.saveOnTxtFile();
             }
 
             public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -80,5 +86,13 @@ public class GpsUtil {
 
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 100, locationListener);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 100, locationListener);
+    }
+
+    public double getActualLongitude() {
+        return actualLongitude;
+    }
+
+    public double getActualLatitude() {
+        return actualLatitude;
     }
 }
