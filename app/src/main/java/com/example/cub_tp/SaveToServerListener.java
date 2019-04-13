@@ -1,9 +1,11 @@
 package com.example.cub_tp;
 
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
@@ -19,12 +21,14 @@ import static com.example.cub_tp.Config.*;
 public class SaveToServerListener implements View.OnClickListener {
 
     JSch jSch = null;
-    Session     session     = null;
-    Channel     channel     = null;
+    Session session = null;
+    Channel channel = null;
     ChannelSftp channelSftp = null;
+    Context context;
 
-    public SaveToServerListener() {
+    public SaveToServerListener(Context context) {
         this.jSch = new JSch();
+        this.context = context;
     }
 
 
@@ -73,7 +77,7 @@ public class SaveToServerListener implements View.OnClickListener {
 
                 String filePathFrom = ANDROID_BASE_FILE_PATH + FILENAME + FILE_EXTENSION;
 
-                String filePathTo = FILENAME + System.currentTimeMillis()/1000 + FILE_EXTENSION;
+                String filePathTo = FILENAME + System.currentTimeMillis()/1000000000 + FILE_EXTENSION;
 
                 channelSftp.put(filePathFrom, filePathTo);
 
@@ -82,6 +86,10 @@ public class SaveToServerListener implements View.OnClickListener {
                 file.delete();
 
                 Log.d("STPConnection", "STP Connection: The file was sent");
+
+
+                Toast.makeText(context, "The file was sent", Toast.LENGTH_SHORT).show();
+
 
             } catch (JSchException e) {
                 // TODO Auto-generated catch block

@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         this.tvSensorList.setText("");
 
         //define onclick event to btn save to server
-        btnSaveToServer.setOnClickListener(new SaveToServerListener());
+        btnSaveToServer.setOnClickListener(new SaveToServerListener(getApplicationContext()));
 
         //start collection data
         btnStartCollectData.setOnClickListener(new View.OnClickListener() {

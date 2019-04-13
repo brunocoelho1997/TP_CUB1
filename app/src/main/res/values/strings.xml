@@ -1,9 +1,9 @@
 <resources>
     <string name="app_name">CUB_TP</string>
     <string name="walking">Andar</string>
-    <string name="walking_downstairs">Descer</string>
+    <string name="walking_downstairs">Descer Escadas</string>
     <string name="sitting">Sentar</string>
-    <string name="walking_upstairs">Subir</string>
+    <string name="walking_upstairs">Subir Escadas</string>
     <string name="laying">Descansar</string>
     <string name="start_collect">Começar Recolha</string>
     <string name="stop_collect">Parar Recolha</string>

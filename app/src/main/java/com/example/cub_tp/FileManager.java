@@ -64,8 +64,6 @@ public class FileManager {
 
         str += "," + MainActivity.actualUserActivity;
 
-
-
         str +="\n";
         return str;
     }
@@ -102,7 +100,9 @@ public class FileManager {
             sidNumber++;
         }
 
-        return "" + android.os.Build.MODEL + "_" + sidNumber;
+        String androidModel = android.os.Build.MODEL;
+        androidModel.replace(" ", "_");
+        return "" + androidModel + "_" + sidNumber;
     }
 
     private static String getSessionIdFromFile() {
@@ -131,7 +131,6 @@ public class FileManager {
 
     public static boolean saveSessionId(String sid) {
         String finalPath = ANDROID_BASE_FILE_PATH + FILENAME_SSID + FILE_EXTENSION_SSID;
-
 
         File filePath = new File(finalPath);
 
