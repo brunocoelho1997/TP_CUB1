@@ -84,18 +84,12 @@
             android:text="@string/see_on_maps"
             android:layout_below="@+id/tv_info_gps" />
 
-        <com.google.android.gms.maps.MapView
-            android:id="@+id/mapview"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_below="@+id/btn_maps"/>
-
         <CheckBox android:id="@+id/ck_auto_mode"
             android:layout_marginTop="10sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/auto_mode"
-            android:layout_below="@+id/mapview"/>
+            android:layout_below="@+id/btn_maps"/>
 
         <TextView
             android:layout_marginTop="10sp"
