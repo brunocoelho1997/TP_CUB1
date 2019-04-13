@@ -16,8 +16,11 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
     private List<Sensor> deviceSensors;
     private Sensor gyroscope;
     private Sensor accelometer;
+    private Sensor light;
+
 
     private static float mLastXGyroscope, mLastYGyroscope, mLastZGyroscope; //used by gyroscope
+    private static float mLastLight;
     private final float NOISE = (float) 2.0; //used by gyroscope
 
     private static float lastXAccelometer, lastYAccelometer, lastZAccelometer;
@@ -40,12 +43,18 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
         if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null){
             this.accelometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         }
+
+        //define Light Sensor
+        if (sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT) != null){
+            this.light = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+        }
+
     }
 
     public void startSensors(){
         sensorManager.registerListener(MySensorManager.this, gyroscope, SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(MySensorManager.this, accelometer, SensorManager.SENSOR_DELAY_NORMAL);
-
+        sensorManager.registerListener(MySensorManager.this, light, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     public void stopSensors(){
@@ -83,6 +92,10 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
             lastYAccelometer = event.values[1];
             lastZAccelometer = event.values[2];
         }
+        else if(event.sensor.getType() == Sensor.TYPE_LIGHT)
+        {
+            mLastLight = event.values[0];
+        }
 
         FileManager.saveOnTxtFile();
     }
@@ -116,5 +129,9 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
 
     public static float getLastZAccelometer() {
         return lastZAccelometer;
+    }
+
+    public static float getmLastLight() {
+        return mLastLight;
     }
 }

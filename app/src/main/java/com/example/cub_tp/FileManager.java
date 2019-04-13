@@ -1,5 +1,8 @@
 package com.example.cub_tp;
 
+import android.os.Build;
+import android.text.TextUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -30,6 +33,11 @@ public class FileManager {
             File file = new File(finalPath);
             FileOutputStream fos;
             file.getParentFile().mkdirs();
+
+            //if the file does not exist will be created a new one... so we need to define its header
+            if(!file.exists())
+                defineHeaderFile(file);
+
             fos = new FileOutputStream(file, true);
 
             String content = getValuesFromAllSensors();
@@ -42,6 +50,31 @@ public class FileManager {
             e.printStackTrace();
         }
 
+    }
+
+    private static void defineHeaderFile(File file) throws IOException {
+        FileOutputStream fos;
+        fos = new FileOutputStream(file, true);
+
+        String header = "";
+
+        header +="session_id,";
+        header +="lat,";
+        header +="lng,";
+        header +="alt,";
+        header +="timestamp,";
+        header +="x_acc,";
+        header +="y_acc,";
+        header +="z_acc,";
+        header +="x_gyro,";
+        header +="y_gyro,";
+        header +="z_gyro,";
+        header +="light,";
+        header +="activity";
+
+        header +="\n";
+        fos.write(header.toString().getBytes());
+        fos.close();
     }
 
     private static String getValuesFromAllSensors() {
@@ -61,6 +94,8 @@ public class FileManager {
         str += "," + mySensorManager.getmLastXGyroscope();
         str += "," + mySensorManager.getmLastYGyroscope();
         str += "," + mySensorManager.getmLastZGyroscope();
+
+        str += "," + mySensorManager.getmLastLight();
 
         str += "," + MainActivity.actualUserActivity;
 
@@ -100,8 +135,8 @@ public class FileManager {
             sidNumber++;
         }
 
-        String androidModel = android.os.Build.MODEL;
-        androidModel.replace(" ", "_");
+        String androidModel = getDeviceName();
+        androidModel.replaceAll(" ","");
         return "" + androidModel + "_" + sidNumber;
     }
 
@@ -149,6 +184,41 @@ public class FileManager {
         }
 
         return true;
+    }
+
+
+
+    //methods to get device name
+    public static String getDeviceName() {
+        String manufacturer = Build.MANUFACTURER;
+        String model = Build.MODEL;
+        if (model.startsWith(manufacturer)) {
+            return capitalize(model);
+        }
+        //return capitalize(manufacturer) + "_" + model;
+
+        return capitalize(manufacturer);
+    }
+    private static String capitalize(String str) {
+        if (TextUtils.isEmpty(str)) {
+            return str;
+        }
+        char[] arr = str.toCharArray();
+        boolean capitalizeNext = true;
+
+        StringBuilder phrase = new StringBuilder();
+        for (char c : arr) {
+            if (capitalizeNext && Character.isLetter(c)) {
+                phrase.append(Character.toUpperCase(c));
+                capitalizeNext = false;
+                continue;
+            } else if (Character.isWhitespace(c)) {
+                capitalizeNext = true;
+            }
+            phrase.append(c);
+        }
+
+        return phrase.toString();
     }
 
 }

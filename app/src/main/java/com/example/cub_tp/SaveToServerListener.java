@@ -79,7 +79,6 @@ public class SaveToServerListener implements View.OnClickListener {
                 String filePathFrom = ANDROID_BASE_FILE_PATH + FILENAME + FILE_EXTENSION;
 
                 String timeStamp = new SimpleDateFormat("dd_MM_yyyy_HHmmss").format(System.currentTimeMillis());
-
                 String filePathTo = FILENAME + timeStamp + FILE_EXTENSION;
 
                 channelSftp.put(filePathFrom, filePathTo);
@@ -90,9 +89,7 @@ public class SaveToServerListener implements View.OnClickListener {
 
                 Log.d("STPConnection", "STP Connection: The file was sent");
 
-
                 Toast.makeText(context, "The file was sent", Toast.LENGTH_SHORT).show();
-
 
             } catch (JSchException e) {
                 // TODO Auto-generated catch block

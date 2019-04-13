@@ -43,14 +43,25 @@ public class MyGps {
         return new LocationListener() {
 
             public void onLocationChanged(final Location location) {
-                final double longitudeNetwork = location.getLongitude();
-                final double latitudeNetwork = location.getLatitude();
-                final double altitudeNetwork= location.getAltitude();
-                actualLatitude = latitudeNetwork;
-                actualLongitude = longitudeNetwork;
-                actualAltitude = altitudeNetwork;
-                MainActivity.tvInfoGps.setText("GPS: " + longitudeNetwork + ", " + latitudeNetwork);
-                Toast.makeText(context, "Network Provider update", Toast.LENGTH_SHORT).show();
+                final double longitude = location.getLongitude();
+                final double latitude = location.getLatitude();
+                final double altitude= location.getAltitude();
+                actualLatitude = latitude;
+                actualLongitude = longitude;
+                actualAltitude = altitude;
+
+                String txtGps ="";
+                txtGps +="Gps:\n";
+                txtGps +="latitude:" + latitude + "\n";
+                txtGps +="longitude:" + longitude + "\n";
+                txtGps +="altitude:" + altitude + "\n";
+                txtGps +="Providers: " + locationManager.getProviders(true) + "\n";
+                txtGps +="Atual provider: " + location.getProvider() + "\n";
+                txtGps +="Gps Accuracy: " + location.getAccuracy() + "\n";
+
+                MainActivity.tvInfoGps.setText(txtGps);
+
+                //Toast.makeText(context, "Network Provider update", Toast.LENGTH_SHORT).show();
 
                 //every time we get a new location we save on the file
                 FileManager.saveOnTxtFile();
@@ -88,6 +99,8 @@ public class MyGps {
 
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 100, locationListener);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 100, locationListener);
+        locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 5000, 100, locationListener);
+
     }
 
     public double getActualLongitude() {

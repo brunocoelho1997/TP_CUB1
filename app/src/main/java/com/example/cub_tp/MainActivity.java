@@ -2,12 +2,15 @@ package com.example.cub_tp;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.Uri;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -18,6 +21,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import java.util.List;
+import java.util.Locale;
 
 import static com.example.cub_tp.Config.*;
 
@@ -39,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
     public static Button btnStartCollectData;
     public static Button btnStopCollectingData;
     public static CheckBox ckAutoMode;
+    public static Button btnMaps;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
         this.tvInfoGps = findViewById(R.id.tv_info_gps);
         this.tvSensorList = findViewById(R.id.tv_info_sensors);
         this.ckAutoMode = findViewById(R.id.ck_auto_mode);
+        this.btnMaps = findViewById(R.id.btn_maps);
 
         this.tvSensorList.setText("");
 
@@ -117,6 +124,16 @@ public class MainActivity extends AppCompatActivity {
         });
 
         ((RadioButton)rgGroupRadio.getChildAt(0)).setChecked(true);
+
+
+        btnMaps.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String uri = String.format(Locale.ENGLISH, "geo:%f,%f", myGps.getActualLatitude(), myGps.getActualLongitude());
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+                v.getContext().startActivity(intent);
+            }
+        });
     }
 
     private void defineSensors() {

@@ -9,4 +9,5 @@
     <string name="stop_collect">Parar Recolha</string>
     <string name="send_data">Transferir Dados</string>
     <string name="auto_mode">Modo Automático</string>
+    <string name="see_on_maps">See on maps</string>
 </resources>
