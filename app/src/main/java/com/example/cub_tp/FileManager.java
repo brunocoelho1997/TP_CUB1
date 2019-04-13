@@ -82,8 +82,8 @@ public class FileManager {
 
         str += getSessionId();
         str += "," + myGps.getActualLatitude();
-        str += "," + myGps.getActualAltitude();
         str += "," + myGps.getActualLongitude();
+        str += "," + myGps.getActualAltitude();
 
         str += "," + new Timestamp(System.currentTimeMillis());
 
