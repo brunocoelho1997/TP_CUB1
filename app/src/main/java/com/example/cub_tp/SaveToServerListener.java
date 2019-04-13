@@ -15,6 +15,7 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 
 import static com.example.cub_tp.Config.*;
 
@@ -77,7 +78,9 @@ public class SaveToServerListener implements View.OnClickListener {
 
                 String filePathFrom = ANDROID_BASE_FILE_PATH + FILENAME + FILE_EXTENSION;
 
-                String filePathTo = FILENAME + System.currentTimeMillis()/1000000000 + FILE_EXTENSION;
+                String timeStamp = new SimpleDateFormat("dd_MM_yyyy_HHmmss").format(System.currentTimeMillis());
+
+                String filePathTo = FILENAME + timeStamp + FILE_EXTENSION;
 
                 channelSftp.put(filePathFrom, filePathTo);
 
