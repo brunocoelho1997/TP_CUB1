@@ -18,7 +18,6 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
     private Sensor accelometer;
     private Sensor light;
 
-
     private static float mLastXGyroscope, mLastYGyroscope, mLastZGyroscope; //used by gyroscope
     private static float mLastLight;
     private final float NOISE = (float) 2.0; //used by gyroscope
@@ -48,7 +47,6 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
         if (sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT) != null){
             this.light = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         }
-
     }
 
     public void startSensors(){
@@ -99,8 +97,6 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
 
         FileManager.saveOnTxtFile();
     }
-
-
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {

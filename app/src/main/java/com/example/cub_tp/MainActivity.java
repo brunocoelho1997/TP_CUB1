@@ -67,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
         else
             requestPermissionsToUser();
 
-
     }
 
 
@@ -95,14 +94,18 @@ public class MainActivity extends AppCompatActivity {
         btnStartCollectData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 mySensorManager.startSensors();
                 myGps.startGpsListening(v.getContext());
                 btnSaveToServer.setEnabled(false);
                 btnMaps.setEnabled(false);
+                btnStartCollectData.setEnabled(false);
+                btnStopCollectingData.setEnabled(true);
             }
         });
 
         //stop collection data
+        btnStopCollectingData.setEnabled(false);
         btnStopCollectingData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -114,6 +117,8 @@ public class MainActivity extends AppCompatActivity {
                 btnSaveToServer.setEnabled(true);
                 btnMaps.setEnabled(true);
                 btnSaveToServer.setEnabled(true);
+                btnStopCollectingData.setEnabled(false);
+                btnStartCollectData.setEnabled(true);
             }
         });
 
