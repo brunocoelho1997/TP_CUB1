@@ -26,6 +26,12 @@ public class FileManager {
         this.mySensorManager = mySensorManager;
     }
 
+    public static boolean fileExists(){
+        String finalPath = ANDROID_BASE_FILE_PATH + FILENAME + FILE_EXTENSION;
+        File file = new File(finalPath);
+        return file.exists();
+    }
+
     public static void saveOnTxtFile(){
 
         try {

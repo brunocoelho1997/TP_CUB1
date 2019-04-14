@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.jcraft.jsch.Channel;
@@ -26,15 +27,18 @@ public class SaveToServerListener implements View.OnClickListener {
     Channel channel = null;
     ChannelSftp channelSftp = null;
     Context context;
+    Button btnSaveToServer;
 
-    public SaveToServerListener(Context context) {
+    public SaveToServerListener(Context context, Button btnSaveToServer) {
         this.jSch = new JSch();
         this.context = context;
+        this.btnSaveToServer = btnSaveToServer;
     }
 
     @Override
     public void onClick(View v) {
         new RetrieveFeedTask(context).execute();
+        btnSaveToServer.setEnabled(false);
     }
 
     private void configureSFTPConnection() throws JSchException, SftpException {
@@ -89,7 +93,7 @@ public class SaveToServerListener implements View.OnClickListener {
                 file.delete();
 
                 Log.d("STPConnection", "STP Connection: The file was sent");
-                
+
             } catch (JSchException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

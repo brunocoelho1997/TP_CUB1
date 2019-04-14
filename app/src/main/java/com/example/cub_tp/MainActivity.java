@@ -87,7 +87,9 @@ public class MainActivity extends AppCompatActivity {
         this.tvSensorList.setText("");
 
         //define onclick event to btn save to server
-        btnSaveToServer.setOnClickListener(new SaveToServerListener(this));
+        btnSaveToServer.setOnClickListener(new SaveToServerListener(this, btnSaveToServer));
+        if(!FileManager.fileExists())
+            btnSaveToServer.setEnabled(false);
 
         //start collection data
         btnStartCollectData.setOnClickListener(new View.OnClickListener() {
@@ -111,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
                 tvInfoGyroscope.setText("");
                 btnSaveToServer.setEnabled(true);
                 btnMaps.setEnabled(true);
-
+                btnSaveToServer.setEnabled(true);
             }
         });
 
