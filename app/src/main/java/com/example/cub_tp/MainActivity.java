@@ -70,37 +70,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void requestPermissionsToUser() {
-        if(!hasPermissions(this, PERMISSIONS)){
-            ActivityCompat.requestPermissions(this, PERMISSIONS, Config.MY_PERMISSIONS_REQUEST_CODE);
-        }
-    }
 
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(grantResults[0]== PackageManager.PERMISSION_GRANTED){
-            defineLayout();
-            defineSensors();
-        }
-        else
-        {
-            new AlertDialog.Builder(this)
-                    .setTitle("Permissions Denied")
-                    .setMessage("You need accept the permissions to use this app. The app will be closed.")
-
-                    // Specifying a listener allows you to take an action before dismissing the dialog.
-                    // The dialog is automatically dismissed when a dialog button is clicked.
-                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            finish();
-                        }
-                    })
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .show();
-        }
-    }
 
     private void defineLayout() {
 
@@ -117,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         this.tvSensorList.setText("");
 
         //define onclick event to btn save to server
-        btnSaveToServer.setOnClickListener(new SaveToServerListener(getApplicationContext()));
+        btnSaveToServer.setOnClickListener(new SaveToServerListener(this));
 
         //start collection data
         btnStartCollectData.setOnClickListener(new View.OnClickListener() {
@@ -125,6 +95,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 mySensorManager.startSensors();
                 myGps.startGpsListening(v.getContext());
+                btnSaveToServer.setEnabled(false);
+                btnMaps.setEnabled(false);
             }
         });
 
@@ -137,6 +109,9 @@ public class MainActivity extends AppCompatActivity {
                 FileManager.restartSessionId();
                 tvInfoGps.setText("");
                 tvInfoGyroscope.setText("");
+                btnSaveToServer.setEnabled(true);
+                btnMaps.setEnabled(true);
+
             }
         });
 
@@ -146,24 +121,23 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
 
             RadioButton button = (RadioButton) group.findViewById(checkedId);
-
-            switch(button.getId()) {
-                case R.id.rb_walking:
-                    actualUserActivity = UserActivity.WALKING;
-                    break;
-                case R.id.rb_sitting:
-                    actualUserActivity = UserActivity.SITTING;
-                    break;
-                case R.id.rb_walking_upstairs:
-                    actualUserActivity = UserActivity.WALKING_UPSTAIRS;
-                    break;
-                case R.id.rb_walking_downstairs:
-                    actualUserActivity = UserActivity.WALKING_DOWNSTAIRS;
-                    break;
-                case R.id.rb_laying:
-                    actualUserActivity = UserActivity.LAYING;
-                    break;
-            }
+                switch(button.getId()) {
+                    case R.id.rb_walking:
+                        actualUserActivity = UserActivity.WALKING;
+                        break;
+                    case R.id.rb_sitting:
+                        actualUserActivity = UserActivity.SITTING;
+                        break;
+                    case R.id.rb_walking_upstairs:
+                        actualUserActivity = UserActivity.WALKING_UPSTAIRS;
+                        break;
+                    case R.id.rb_walking_downstairs:
+                        actualUserActivity = UserActivity.WALKING_DOWNSTAIRS;
+                        break;
+                    case R.id.rb_laying:
+                        actualUserActivity = UserActivity.LAYING;
+                        break;
+                }
             }
         });
 
@@ -189,18 +163,6 @@ public class MainActivity extends AppCompatActivity {
         this.fileManager = new FileManager(myGps,mySensorManager);
     }
 
-
-    public static boolean hasPermissions(Context context, String... permissions) {
-        if (context != null && permissions != null) {
-            for (String permission : permissions) {
-                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -215,5 +177,53 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         if(mySensorManager != null)
             mySensorManager.stopSensors();
+    }
+
+    /*
+
+     ---------------------permissions code -------------------------------
+
+      */
+
+    private void requestPermissionsToUser() {
+        if(!hasPermissions(this, PERMISSIONS)){
+            ActivityCompat.requestPermissions(this, PERMISSIONS, Config.MY_PERMISSIONS_REQUEST_CODE);
+        }
+    }
+
+    public static boolean hasPermissions(Context context, String... permissions) {
+        if (context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(grantResults[0]== PackageManager.PERMISSION_GRANTED){
+            defineLayout();
+            defineSensors();
+        }
+        else
+        {
+            new AlertDialog.Builder(this)
+                    .setTitle("Permissions Denied")
+                    .setMessage("You need accept the permissions to use this app. The app will be closed.")
+
+                    // Specifying a listener allows you to take an action before dismissing the dialog.
+                    // The dialog is automatically dismissed when a dialog button is clicked.
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }
     }
 }

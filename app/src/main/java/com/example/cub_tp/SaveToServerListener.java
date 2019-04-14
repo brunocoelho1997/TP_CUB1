@@ -32,11 +32,9 @@ public class SaveToServerListener implements View.OnClickListener {
         this.context = context;
     }
 
-
-
     @Override
     public void onClick(View v) {
-        new RetrieveFeedTask().execute();
+        new RetrieveFeedTask(context).execute();
     }
 
     private void configureSFTPConnection() throws JSchException, SftpException {
@@ -68,8 +66,11 @@ public class SaveToServerListener implements View.OnClickListener {
 
     class RetrieveFeedTask extends AsyncTask<String, Void, Void> {
 
-        //font: https://stackoverflow.com/questions/6343166/how-do-i-fix-android-os-networkonmainthreadexception
-        private Exception exception;
+        private Context context;
+
+        public RetrieveFeedTask(Context context) {
+            this.context = context;
+        }
 
         protected Void doInBackground(String... urls) {
             try {
@@ -88,9 +89,7 @@ public class SaveToServerListener implements View.OnClickListener {
                 file.delete();
 
                 Log.d("STPConnection", "STP Connection: The file was sent");
-
-                Toast.makeText(context, "The file was sent", Toast.LENGTH_LONG).show();
-
+                
             } catch (JSchException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -104,6 +103,12 @@ public class SaveToServerListener implements View.OnClickListener {
                 closeConnection();
             }
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            Toast.makeText(context, "The file was sent", Toast.LENGTH_LONG).show();
         }
 
         public void closeConnection(){
