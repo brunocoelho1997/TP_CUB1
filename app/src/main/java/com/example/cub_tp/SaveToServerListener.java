@@ -89,7 +89,7 @@ public class SaveToServerListener implements View.OnClickListener {
 
                 Log.d("STPConnection", "STP Connection: The file was sent");
 
-                Toast.makeText(context, "The file was sent", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "The file was sent", Toast.LENGTH_LONG).show();
 
             } catch (JSchException e) {
                 // TODO Auto-generated catch block

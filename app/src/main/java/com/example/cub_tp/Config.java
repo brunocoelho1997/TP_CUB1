@@ -1,8 +1,10 @@
 package com.example.cub_tp;
 
+import android.Manifest;
+
 public class Config {
-    public static final int MY_PERMISSIONS_REQUEST_GET_ACCESS_LOCATION = 1;
-    public static final int MY_PERMISSIONS_REQUEST_GET_WRITE_EXTERNAL_STORAGE = 1;
+    public static final int MY_PERMISSIONS_REQUEST_CODE = 1;
+    public static final String[] PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
 
     public static String ANDROID_BASE_FILE_PATH = "/storage/emulated/0/";

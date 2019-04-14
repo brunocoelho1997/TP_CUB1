@@ -2,6 +2,7 @@ package com.example.cub_tp;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
@@ -9,10 +10,13 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -46,15 +50,56 @@ public class MainActivity extends AppCompatActivity {
     public static Button btnMaps;
 
 
+    private boolean userHasPermissions;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        defineLayout();
-        defineSensors();
+        this.userHasPermissions = hasPermissions(this, PERMISSIONS);
 
-        this.fileManager = new FileManager(myGps,mySensorManager);
+        if(userHasPermissions)
+        {
+            defineLayout();
+            defineSensors();
+        }
+        else
+            requestPermissionsToUser();
+
+
+    }
+
+    private void requestPermissionsToUser() {
+        if(!hasPermissions(this, PERMISSIONS)){
+            ActivityCompat.requestPermissions(this, PERMISSIONS, Config.MY_PERMISSIONS_REQUEST_CODE);
+        }
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(grantResults[0]== PackageManager.PERMISSION_GRANTED){
+            defineLayout();
+            defineSensors();
+        }
+        else
+        {
+            new AlertDialog.Builder(this)
+                    .setTitle("Permissions Denied")
+                    .setMessage("You need accept the permissions to use this app. The app will be closed.")
+
+                    // Specifying a listener allows you to take an action before dismissing the dialog.
+                    // The dialog is automatically dismissed when a dialog button is clicked.
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }
     }
 
     private void defineLayout() {
@@ -135,50 +180,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void defineSensors() {
-
-        //if user doen't have permissions need to ask him
-        checkPermissions(); //TODO: need to return boolean value;
-
         //define sensor manager
         this.mySensorManager = new MySensorManager((SensorManager) getSystemService(Context.SENSOR_SERVICE));
-
         //define GPS
         this.myGps = new MyGps();
-    }
 
-    private void checkPermissions() {
-
-        //for GPS Location
-        // Register the listener with the Location Manager to receive location updates
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                // Show an expanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-            } else {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        MY_PERMISSIONS_REQUEST_GET_ACCESS_LOCATION);
-            }
-        }
-
-        //TODO: for external save - this isn't working...
-        /*
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-
-            } else {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                        MY_PERMISSIONS_REQUEST_GET_WRITE_EXTERNAL_STORAGE);
-            }
-        }
-        */
+        //define where will be written the data
+        this.fileManager = new FileManager(myGps,mySensorManager);
     }
 
 
+    public static boolean hasPermissions(Context context, String... permissions) {
+        if (context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
     @Override
     protected void onResume() {
@@ -192,6 +213,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        mySensorManager.stopSensors();
+        if(mySensorManager != null)
+            mySensorManager.stopSensors();
     }
 }
