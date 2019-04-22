@@ -15,13 +15,7 @@ public class Config {
     public static String FILE_EXTENSION_SSID = ".bin";
 
 
+    public static String FILENAME_SERVER_CONFIG = "server_config";
+    public static String FILE_EXTENSION_SERVER_CONFIG = ".txt";
 
-
-    /*Below we have declared and defined the SFTP HOST, PORT, USER
-                   and Local private key from where you will make connection */
-    public static String SFTPHOST = "urbysense.dei.uc.pt";
-    public static int    SFTPPORT = 22;
-    public static String SFTPUSER = "cubistudent";
-    public static String privateKey = "mis_cubi_2019";
-    public static String SFTP_WORKING_DIR = "data/a21250078/";
 }

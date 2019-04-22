@@ -2,17 +2,22 @@ package com.example.cub_tp;
 
 import android.os.Build;
 import android.text.TextUtils;
+import android.util.Log;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 import static com.example.cub_tp.Config.*;
 
@@ -20,6 +25,12 @@ public class FileManager {
     private static String sessionId;
     private static MyGps myGps;
     private static MySensorManager mySensorManager;
+
+    public static String sftHost = null;
+    public static String sftUser = null;
+    public static String privateKey = null;
+    public static String sftWorkingDir = null;
+    public static int sftPort = 0;
 
     public FileManager(MyGps myGps, MySensorManager mySensorManager) {
         this.myGps = myGps;
@@ -164,7 +175,7 @@ public class FileManager {
             fis.close();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.d("FileManager", "File of sid not found. Will be created a new one.");
         }
 
         return sid;
@@ -190,6 +201,82 @@ public class FileManager {
         }
 
         return true;
+    }
+
+    public static boolean loadFileServerConfigData(){
+
+        try{
+            String path = ANDROID_BASE_FILE_PATH + FILENAME_SERVER_CONFIG + FILE_EXTENSION_SERVER_CONFIG;
+
+            List<String> allLines = new ArrayList<>();
+
+            File file = new File(path);
+
+            //if file does not exist create a new one to user define the vars
+            if(!file.exists())
+            {
+                createFileServerConfigData();
+                return false;
+            }
+
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            String line;
+            while ((line = br.readLine()) != null) {
+                allLines.add(line);
+            }
+
+            if(allLines.size()!=5)
+                return false;
+
+            sftHost = allLines.get(0).replace("SFTP_HOST:", "");
+            String sftPortStr = allLines.get(1).replace("SFTP_PORT:", "");
+            sftPort = Integer.parseInt(sftPortStr);
+            sftUser = allLines.get(2).replace("SFTP_USER:", "");
+            privateKey = allLines.get(3).replace("PRIVATE_KEY:", "");
+            sftWorkingDir = allLines.get(4).replace("SFTP_WORKING_DIR:", "");
+
+            return true;
+
+        } catch (Exception e) {
+            Log.d("FileManager", "Error: " + e);
+            return false;
+        }
+    }
+
+    private static boolean createFileServerConfigData(){
+
+        try{
+
+            List<String> content = new ArrayList<>();
+
+            content.add("SFTP_HOST:");
+            content.add("SFTP_PORT:");
+            content.add("SFTP_USER:");
+            content.add("PRIVATE_KEY:");
+            content.add("SFTP_WORKING_DIR:");
+
+            StringBuilder strContent = new StringBuilder();
+            for (String str : content) {
+                strContent.append(str).append("\n");
+            }
+
+            String path = ANDROID_BASE_FILE_PATH + FILENAME_SERVER_CONFIG + FILE_EXTENSION_SERVER_CONFIG;
+            File file = new File(path);
+            FileOutputStream fos;
+            file.getParentFile().mkdirs();
+
+            fos = new FileOutputStream(file);
+            fos.write(strContent.toString().getBytes());
+            fos.close();
+
+            return true;
+
+        } catch (Exception ex) {
+            Log.d("FileManager", "Error: " + ex);
+            return false;
+        }
+
+
     }
 
 
@@ -226,5 +313,6 @@ public class FileManager {
 
         return phrase.toString();
     }
+
 
 }

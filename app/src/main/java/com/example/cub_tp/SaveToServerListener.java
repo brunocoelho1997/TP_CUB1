@@ -1,8 +1,11 @@
 package com.example.cub_tp;
 
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -38,23 +41,24 @@ public class SaveToServerListener implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         new RetrieveFeedTask(context).execute();
-        btnSaveToServer.setEnabled(false);
     }
 
-    private void configureSFTPConnection() throws JSchException, SftpException {
-        //jSch.addIdentity(privateKey);
-        //Log.d("STPConnection", "STP Connection: Private Key Added.");
-        //session = jSch.getSession(SFTPUSER,SFTPHOST,SFTPPORT);
+    private void configureSFTPConnection() throws Exception {
+
+        boolean result = FileManager.loadFileServerConfigData();
+
+        if(!result)
+            throw new Exception("error");
 
         //create a session
-        session = jSch.getSession(SFTPUSER,SFTPHOST,SFTPPORT);
+        session = jSch.getSession(FileManager.sftUser,FileManager.sftHost,FileManager.sftPort);
         Log.d("STPConnection", "STP Connection: session created.");
 
         //config the session with the password
         java.util.Properties config = new java.util.Properties();
         config.put("StrictHostKeyChecking", "no");
         session.setConfig(config);
-        session.setPassword(privateKey);
+        session.setPassword(FileManager.privateKey);
 
         session.connect();
         channel = session.openChannel("sftp");
@@ -62,8 +66,8 @@ public class SaveToServerListener implements View.OnClickListener {
         Log.d("STPConnection", "STP Connection: shell channel connected.....");
 
         channelSftp = (ChannelSftp)channel;
-        channelSftp.cd(SFTP_WORKING_DIR);
-        Log.d("STPConnection", "STP Connection: Changed the directory to: " + SFTP_WORKING_DIR);
+        channelSftp.cd(FileManager.sftWorkingDir);
+        Log.d("STPConnection", "STP Connection: Changed the directory to: " + FileManager.sftWorkingDir);
 
     }
 
@@ -72,6 +76,8 @@ public class SaveToServerListener implements View.OnClickListener {
 
         private Context context;
 
+        private boolean fileSent = false;
+
         public RetrieveFeedTask(Context context) {
             this.context = context;
         }
@@ -79,7 +85,16 @@ public class SaveToServerListener implements View.OnClickListener {
         protected Void doInBackground(String... urls) {
             try {
                 if(channelSftp == null)
-                    configureSFTPConnection();
+                {
+                    try{
+                        //if the config file of the server isn't defined or wrong defined will be catch the exception
+                        configureSFTPConnection();
+                    }catch (Exception e)
+                    {
+                        fileSent = false;
+                    }
+
+                }
 
                 String filePathFrom = ANDROID_BASE_FILE_PATH + FILENAME + FILE_EXTENSION;
 
@@ -92,19 +107,13 @@ public class SaveToServerListener implements View.OnClickListener {
                 File file = new File(filePathFrom);
                 file.delete();
 
+                fileSent = true;
                 Log.d("STPConnection", "STP Connection: The file was sent");
 
-            } catch (JSchException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-
-                closeConnection();
-            } catch (SftpException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                closeConnection();
             }catch (Exception e){
+                fileSent = false;
                 closeConnection();
+                Log.d("SaveToServerListener", "" + e);
             }
             return null;
         }
@@ -112,7 +121,27 @@ public class SaveToServerListener implements View.OnClickListener {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            Toast.makeText(context, "The file was sent", Toast.LENGTH_LONG).show();
+            if(fileSent)
+            {
+                btnSaveToServer.setEnabled(false);
+                Toast.makeText(context, "The file was sent", Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                new AlertDialog.Builder(context)
+                        .setTitle(R.string.server_wrong_data_title)
+                        .setMessage(context.getString(R.string.server_worng_data_desc) + Config.FILENAME_SERVER_CONFIG + "" + Config.FILE_EXTENSION_SERVER_CONFIG )
+
+                        // Specifying a listener allows you to take an action before dismissing the dialog.
+                        // The dialog is automatically dismissed when a dialog button is clicked.
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
+            }
         }
 
         public void closeConnection(){

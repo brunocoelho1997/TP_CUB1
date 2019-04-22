@@ -219,8 +219,8 @@ public class MainActivity extends AppCompatActivity {
         else
         {
             new AlertDialog.Builder(this)
-                    .setTitle("Permissions Denied")
-                    .setMessage("You need accept the permissions to use this app. The app will be closed.")
+                    .setTitle(R.string.permissions_denied)
+                    .setMessage(R.string.permissions_denied_desc)
 
                     // Specifying a listener allows you to take an action before dismissing the dialog.
                     // The dialog is automatically dismissed when a dialog button is clicked.
