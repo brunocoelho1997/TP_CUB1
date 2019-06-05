@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     public static Button btnSaveToServer;
     public static TextView tvSensorList;
     public static TextView tvInfoGyroscope;
+    public static TextView tvInfoAccelometer;
     public static TextView tvInfoGps;
     public static Button btnStartCollectData;
     public static Button btnStopCollectingData;
@@ -78,6 +79,8 @@ public class MainActivity extends AppCompatActivity {
         this.btnStopCollectingData = findViewById(R.id.btn_stop_collect);
         this.btnSaveToServer = findViewById(R.id.btn_send_data);
         this.tvInfoGyroscope = findViewById(R.id.tv_info_gyroscope);
+        this.tvInfoAccelometer= findViewById(R.id.tv_info_accelometer);
+
         this.tvInfoGps = findViewById(R.id.tv_info_gps);
         this.tvSensorList = findViewById(R.id.tv_info_sensors);
         this.ckAutoMode = findViewById(R.id.ck_auto_mode);
@@ -114,6 +117,8 @@ public class MainActivity extends AppCompatActivity {
                 FileManager.restartSessionId();
                 tvInfoGps.setText("");
                 tvInfoGyroscope.setText("");
+                tvInfoAccelometer.setText("");
+
                 btnSaveToServer.setEnabled(true);
                 btnMaps.setEnabled(true);
                 btnSaveToServer.setEnabled(true);

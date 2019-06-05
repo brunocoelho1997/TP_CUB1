@@ -85,7 +85,8 @@ public class MyGps {
         }
 
         Location location = locationManager.getLastKnownLocation("gps");
-        MainActivity.tvInfoGps.setText("" + location.getLatitude() + " - " + location.getLongitude());
+        if(location != null)
+            MainActivity.tvInfoGps.setText("" + location.getLatitude() + " - " + location.getLongitude());
         Toast.makeText(context, "Last Location", Toast.LENGTH_SHORT).show();
     }
 

@@ -18,6 +18,9 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
     private Sensor accelometer;
     private Sensor light;
 
+
+    boolean mInitializedGyroscope = false, mInitializedAccelometer = false;
+
     private static float mLastXGyroscope, mLastYGyroscope, mLastZGyroscope; //used by gyroscope
     private static float mLastLight;
     private final float NOISE = (float) 2.0; //used by gyroscope
@@ -65,37 +68,114 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
 
         //applyLowPassFilter(linear_acceleration, event);
 
+        boolean sensorChanged = false;
+
+
         if(event.sensor.getType() == Sensor.TYPE_GYROSCOPE)
         {
             float x = event.values[0];
             float y = event.values[1];
             float z = event.values[2];
 
-            float deltaX = Math.abs(mLastXGyroscope - x);
-            float deltaY = Math.abs(mLastYGyroscope - y);
-            float deltaZ = Math.abs(mLastZGyroscope - z);
-            if (deltaX < NOISE) deltaX = (float)0.0;
-            if (deltaY < NOISE) deltaY = (float)0.0;
-            if (deltaZ < NOISE) deltaZ = (float)0.0;
-            mLastXGyroscope = x;
-            mLastYGyroscope = y;
-            mLastZGyroscope = z;
+            if (!mInitializedGyroscope) {
+                mLastXGyroscope = x;
+                mLastYGyroscope = y;
+                mLastZGyroscope = z;
+                //tvX.setText("0.0");
+                //tvY.setText("0.0");
+                //tvZ.setText("0.0");
+                mInitializedGyroscope = true;
+            } else {
 
+
+                float deltaX = Math.abs(mLastXGyroscope - x);
+                float deltaY = Math.abs(mLastYGyroscope - y);
+                float deltaZ = Math.abs(mLastZGyroscope - z);
+
+                if (deltaX < NOISE)
+                    deltaX = (float)0.0;
+                else
+                {
+                    mLastXGyroscope = x;
+                    sensorChanged = true;
+                }
+
+                if (deltaY < NOISE)
+                    deltaY = (float)0.0;
+                else
+                {
+                    mLastYGyroscope = y;
+                    sensorChanged = true;
+                }
+
+                if (deltaZ < NOISE)
+                    deltaZ = (float)0.0;
+                else
+                {
+                    mLastZGyroscope = z;
+                    sensorChanged = true;
+                }
+            }
             MainActivity.tvInfoGyroscope.setText("Gyroscope: x= " + mLastXGyroscope + " y= " + mLastYGyroscope + " z= " + mLastZGyroscope);
 
         }
         else if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
         {
-            lastXAccelometer = event.values[0];
-            lastYAccelometer = event.values[1];
-            lastZAccelometer = event.values[2];
+            float x = event.values[0];
+            float y = event.values[1];
+            float z = event.values[2];
+
+            if (!mInitializedAccelometer) {
+                lastXAccelometer = x;
+                lastYAccelometer = y;
+                lastZAccelometer = z;
+                //tvX.setText("0.0");
+                //tvY.setText("0.0");
+                //tvZ.setText("0.0");
+                mInitializedAccelometer = true;
+            } else {
+
+
+                float deltaX = Math.abs(lastXAccelometer - x);
+                float deltaY = Math.abs(lastYAccelometer - y);
+                float deltaZ = Math.abs(lastZAccelometer - z);
+                if (deltaX < NOISE)
+                    deltaX = (float)0.0;
+                else
+                {
+                    lastXAccelometer = x;
+                    sensorChanged = true;
+
+                }
+
+                if (deltaY < NOISE)
+                    deltaY = (float)0.0;
+                else
+                {
+                    sensorChanged = true;
+                    lastYAccelometer = y;
+                }
+
+
+                if (deltaZ < NOISE)
+                    deltaZ = (float)0.0;
+                else
+                {
+                    sensorChanged = true;
+                    lastZAccelometer = z;
+                }
+            }
+
+            MainActivity.tvInfoAccelometer.setText("Accelometer: x= " + lastXAccelometer + " y= " + lastYAccelometer + " z= " + lastZAccelometer);
+
         }
         else if(event.sensor.getType() == Sensor.TYPE_LIGHT)
         {
             mLastLight = event.values[0];
         }
 
-        FileManager.saveOnTxtFile();
+        if(sensorChanged)
+            FileManager.saveOnTxtFile();
     }
 
     @Override
