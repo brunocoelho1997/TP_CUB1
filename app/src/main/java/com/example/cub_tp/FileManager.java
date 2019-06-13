@@ -81,12 +81,25 @@ public class FileManager {
         header +="alt,";
         header +="timestamp,";
         header +="x_acc,";
+        header +="x_acc_mean,";
+        header +="x_acc_median,";
         header +="y_acc,";
+        header +="y_acc_mean,";
+        header +="y_acc_median,";
         header +="z_acc,";
+        header +="z_acc_mean,";
+        header +="z_acc_median,";
         header +="x_gyro,";
+        header +="x_gyro_mean,";
+        header +="x_gyro_median,";
         header +="y_gyro,";
+        header +="y_gyro_mean,";
+        header +="y_gyro_median,";
         header +="z_gyro,";
+        header +="z_gyro_mean,";
+        header +="z_gyro_median,";
         header +="light,";
+        header +="light_mean,";
         header +="activity";
 
         header +="\n";
@@ -105,14 +118,33 @@ public class FileManager {
         str += "," + new Timestamp(System.currentTimeMillis());
 
         str += "," + mySensorManager.getLastXAccelometer();
+        str += "," + mySensorManager.getLastXAccelometerValuesMean();
+        str += "," + mySensorManager.getLastXAccelometerValuesMedian();
+
         str += "," + mySensorManager.getLastYAccelometer();
+        str += "," + mySensorManager.getLastYAccelometerValuesMean();
+        str += "," + mySensorManager.getLastYAccelometerValuesMedian();
+
         str += "," + mySensorManager.getLastZAccelometer();
+        str += "," + mySensorManager.getLastZAccelometerValuesMean();
+        str += "," + mySensorManager.getLastZAccelometerValuesMedian();
 
         str += "," + mySensorManager.getmLastXGyroscope();
+        str += "," + mySensorManager.getLastXGyroscopeValuesMean();
+        str += "," + mySensorManager.getLastXGyroscopeValuesMedian();
+
         str += "," + mySensorManager.getmLastYGyroscope();
+        str += "," + mySensorManager.getLastYGyroscopeValuesMean();
+        str += "," + mySensorManager.getLastYGyroscopeValuesMedian();
+
         str += "," + mySensorManager.getmLastZGyroscope();
+        str += "," + mySensorManager.getLastZGyroscopeValuesMean();
+        str += "," + mySensorManager.getLastZGyroscopeValuesMedian();// != null ? mySensorManager.getLastZGyroscopeValuesMedian() : "";
 
         str += "," + mySensorManager.getmLastLight();
+        str += "," + mySensorManager.getmLastLightMean();
+        str += "," + mySensorManager.getmLastLightMedian();
+
 
         str += "," + MainActivity.actualUserActivity;
 

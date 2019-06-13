@@ -67,10 +67,7 @@ public class MainActivity extends AppCompatActivity {
         }
         else
             requestPermissionsToUser();
-
     }
-
-
 
     private void defineLayout() {
 

@@ -18,4 +18,5 @@ public class Config {
     public static String FILENAME_SERVER_CONFIG = "server_config";
     public static String FILE_EXTENSION_SERVER_CONFIG = ".txt";
 
+    public static int MIN_VALUES_TO_MEAN_MEDIAN = 5;
 }
