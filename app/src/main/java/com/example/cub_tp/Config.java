@@ -10,6 +10,8 @@ public class Config {
     public static String ANDROID_BASE_FILE_PATH = "/storage/emulated/0/";
     public static String FILENAME = "tmp";
     public static String FILE_EXTENSION = ".csv";
+    public static String FILE_EXTENSION_ARFF = ".arff";
+
 
     public static String FILENAME_SSID = "ssid";
     public static String FILE_EXTENSION_SSID = ".bin";
@@ -19,4 +21,6 @@ public class Config {
     public static String FILE_EXTENSION_SERVER_CONFIG = ".txt";
 
     public static int MIN_VALUES_TO_MEAN_MEDIAN = 5;
+    public static int MIN_VALUES_TO_FFT = 64;
+
 }

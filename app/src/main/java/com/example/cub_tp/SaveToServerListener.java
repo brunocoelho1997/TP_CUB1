@@ -96,16 +96,29 @@ public class SaveToServerListener implements View.OnClickListener {
 
                 }
 
-                String filePathFrom = ANDROID_BASE_FILE_PATH + FILENAME + FILE_EXTENSION;
-
                 String timeStamp = new SimpleDateFormat("dd_MM_yyyy_HHmmss").format(System.currentTimeMillis());
-                String filePathTo = FILENAME + timeStamp + FILE_EXTENSION;
-
-                channelSftp.put(filePathFrom, filePathTo);
-
-                //clear the content of the file (deleting the file)
+                //for csv file
+                String filePathFrom = ANDROID_BASE_FILE_PATH + FILENAME + FILE_EXTENSION;
                 File file = new File(filePathFrom);
-                file.delete();
+                if(file.exists())
+                {
+                    String filePathTo = FILENAME + timeStamp + FILE_EXTENSION;
+                    channelSftp.put(filePathFrom, filePathTo);
+                    //clear the content of the file (deleting the file)
+                    file.delete();
+                }
+
+                //for arff file
+                filePathFrom = ANDROID_BASE_FILE_PATH + FILENAME + FILE_EXTENSION_ARFF;
+                file = new File(filePathFrom);
+                if(file.exists())
+                {
+                    String filePathTo = FILENAME + timeStamp + FILE_EXTENSION_ARFF;
+                    channelSftp.put(filePathFrom, filePathTo);
+                    //clear the content of the file (deleting the file)
+                    file = new File(filePathFrom);
+                    file.delete();
+                }
 
                 fileSent = true;
                 Log.d("STPConnection", "STP Connection: The file was sent");

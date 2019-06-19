@@ -17,7 +17,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 
 import static com.example.cub_tp.Config.*;
 
@@ -38,26 +37,30 @@ public class FileManager {
     }
 
     public static boolean fileExists(){
-        String finalPath = ANDROID_BASE_FILE_PATH + FILENAME + FILE_EXTENSION;
-        File file = new File(finalPath);
-        return file.exists();
+        String finalPathCsv = ANDROID_BASE_FILE_PATH + FILENAME + FILE_EXTENSION;
+        File fileCsv = new File(finalPathCsv);
+
+        String finalPathArff = ANDROID_BASE_FILE_PATH + FILENAME + FILE_EXTENSION_ARFF;
+        File fileArff = new File(finalPathArff);
+
+        return (fileCsv.exists() || fileArff.exists());
     }
 
-    public static void saveOnTxtFile(){
+    public static void saveOnArffFile(double[] reGyroscope, double[] imGyroscope, double[] reAccelometer, double[] imAccelometer){
 
         try {
-            String finalPath = ANDROID_BASE_FILE_PATH + FILENAME + FILE_EXTENSION;
+            String finalPath = ANDROID_BASE_FILE_PATH + FILENAME + FILE_EXTENSION_ARFF;
             File file = new File(finalPath);
             FileOutputStream fos;
             file.getParentFile().mkdirs();
 
             //if the file does not exist will be created a new one... so we need to define its header
             if(!file.exists())
-                defineHeaderFile(file);
+                defineArffHeaderFile(file);
 
             fos = new FileOutputStream(file, true);
 
-            String content = getValuesFromAllSensors();
+            String content = getValuesFromAllSensorsToArffFile(reGyroscope, imGyroscope, reAccelometer, imAccelometer);
 
             fos.write(content.toString().getBytes());
             fos.close();
@@ -69,7 +72,33 @@ public class FileManager {
 
     }
 
-    private static void defineHeaderFile(File file) throws IOException {
+    public static void saveOnCsvFile(){
+
+        try {
+            String finalPath = ANDROID_BASE_FILE_PATH + FILENAME + FILE_EXTENSION;
+            File file = new File(finalPath);
+            FileOutputStream fos;
+            file.getParentFile().mkdirs();
+
+            //if the file does not exist will be created a new one... so we need to define its header
+            if(!file.exists())
+                defineCsvHeaderFile(file);
+
+            fos = new FileOutputStream(file, true);
+
+            String content = getValuesFromAllSensorsToCsvFile();
+
+            fos.write(content.toString().getBytes());
+            fos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private static void defineCsvHeaderFile(File file) throws IOException {
         FileOutputStream fos;
         fos = new FileOutputStream(file, true);
 
@@ -81,26 +110,12 @@ public class FileManager {
         header +="alt,";
         header +="timestamp,";
         header +="x_acc,";
-        header +="x_acc_mean,";
-        header +="x_acc_median,";
         header +="y_acc,";
-        header +="y_acc_mean,";
-        header +="y_acc_median,";
         header +="z_acc,";
-        header +="z_acc_mean,";
-        header +="z_acc_median,";
         header +="x_gyro,";
-        header +="x_gyro_mean,";
-        header +="x_gyro_median,";
         header +="y_gyro,";
-        header +="y_gyro_mean,";
-        header +="y_gyro_median,";
         header +="z_gyro,";
-        header +="z_gyro_mean,";
-        header +="z_gyro_median,";
         header +="light,";
-        header +="light_mean,";
-        header +="light_median,";
         header +="activity";
 
         header +="\n";
@@ -108,7 +123,51 @@ public class FileManager {
         fos.close();
     }
 
-    private static String getValuesFromAllSensors() {
+    private static void defineArffHeaderFile(File file) throws IOException {
+        FileOutputStream fos;
+        fos = new FileOutputStream(file, true);
+
+        String header = "";
+
+        header +="@RELATION activityrecognition\n\n";
+
+        for(int i = 1; i <= 64; i++)
+            header +="@ATTRIBUTE accelometer" + i + " real\n";
+
+        for(int i = 1; i <= 64; i++)
+            header +="@ATTRIBUTE gyroscope" + i + " real\n";
+
+        header +="@ATTRIBUTE activity {WALKING,LAYING,SITTING,WALKING_DOWNSTAIRS,WALKING_UPSTAIRS}";
+
+        header +="\n\n@DATA\n";
+
+        fos.write(header.toString().getBytes());
+        fos.close();
+    }
+
+    private static String getValuesFromAllSensorsToArffFile(double[] reGyroscope, double[] imGyroscope, double[] reAccelometer, double[] imAccelometer) {
+        String str ="";
+
+        for(int i = 0; i < reAccelometer.length; i++)
+        {
+            str +="" + mySensorManager.getAngularVelocity(reAccelometer[i], imAccelometer[i]);
+            str += ((i+1)==reAccelometer.length? "": ",");
+        }
+
+        str+=",";
+
+        for(int i = 0; i < reGyroscope.length; i++)
+        {
+            str +="" + mySensorManager.getAngularVelocity(reGyroscope[i], imGyroscope[i]);
+            str += ((i+1)==reGyroscope.length? "": ",");
+        }
+        str += "," + MainActivity.actualUserActivity;
+
+        str +="\n";
+        return str;
+    }
+
+    private static String getValuesFromAllSensorsToCsvFile() {
         String str ="";
 
         str += getSessionId();
@@ -119,34 +178,12 @@ public class FileManager {
         str += "," + new Timestamp(System.currentTimeMillis());
 
         str += "," + mySensorManager.getLastXAccelometer();
-        str += "," + (mySensorManager.getLastXAccelometerValuesMean() != null ? mySensorManager.getLastXAccelometerValuesMean() : " ");
-        str += "," + (mySensorManager.getLastXAccelometerValuesMedian() != null ? mySensorManager.getLastXAccelometerValuesMedian() : " ");
-
         str += "," + mySensorManager.getLastYAccelometer();
-        str += "," + (mySensorManager.getLastYAccelometerValuesMean() != null ? mySensorManager.getLastYAccelometerValuesMean() : " ");
-        str += "," + (mySensorManager.getLastYAccelometerValuesMedian() != null ? mySensorManager.getLastYAccelometerValuesMedian() : " ");
-
         str += "," + mySensorManager.getLastZAccelometer();
-        str += "," + (mySensorManager.getLastZAccelometerValuesMean() != null ? mySensorManager.getLastZAccelometerValuesMean() : " ");
-        str += "," + (mySensorManager.getLastZAccelometerValuesMedian() != null ? mySensorManager.getLastZAccelometerValuesMedian() : " ");
-
         str += "," + mySensorManager.getmLastXGyroscope();
-        str += "," + (mySensorManager.getLastXGyroscopeValuesMean() != null ? mySensorManager.getLastXGyroscopeValuesMean() : " ");
-        str += "," + (mySensorManager.getLastXGyroscopeValuesMedian() != null ? mySensorManager.getLastXGyroscopeValuesMedian() : " ");
-
         str += "," + mySensorManager.getmLastYGyroscope();
-        str += "," + (mySensorManager.getLastYGyroscopeValuesMean() != null ? mySensorManager.getLastYGyroscopeValuesMean() : " ");
-        str += "," + (mySensorManager.getLastYGyroscopeValuesMedian() != null ? mySensorManager.getLastYGyroscopeValuesMedian() : " ");
-
         str += "," + mySensorManager.getmLastZGyroscope();
-        str += "," + (mySensorManager.getLastZGyroscopeValuesMean() != null ? mySensorManager.getLastZGyroscopeValuesMean() : " ");
-        str += "," + (mySensorManager.getLastZGyroscopeValuesMedian() != null ? mySensorManager.getLastZGyroscopeValuesMedian() : " ");
-
         str += "," + mySensorManager.getmLastLight();
-        str += "," + (mySensorManager.getmLastLightMean() != null ? mySensorManager.getmLastLightMean() : " ");
-        str += "," + (mySensorManager.getmLastLightMedian() != null ? mySensorManager.getmLastLightMedian() : " ");
-
-
         str += "," + MainActivity.actualUserActivity;
 
         str +="\n";

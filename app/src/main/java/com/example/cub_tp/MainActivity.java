@@ -110,7 +110,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mySensorManager.stopSensors();
+                mySensorManager.clearAngularVelocities();
                 myGps.stopGpsListening(v.getContext());
+                mySensorManager.clearAngularVelocities();
                 FileManager.restartSessionId();
                 tvInfoGps.setText("");
                 tvInfoGyroscope.setText("");
@@ -133,18 +135,28 @@ public class MainActivity extends AppCompatActivity {
                 switch(button.getId()) {
                     case R.id.rb_walking:
                         actualUserActivity = UserActivity.WALKING;
+                        if(mySensorManager != null)
+                            mySensorManager.clearAngularVelocities();
                         break;
                     case R.id.rb_sitting:
                         actualUserActivity = UserActivity.SITTING;
+                        if(mySensorManager != null)
+                            mySensorManager.clearAngularVelocities();
                         break;
                     case R.id.rb_walking_upstairs:
                         actualUserActivity = UserActivity.WALKING_UPSTAIRS;
+                        if(mySensorManager != null)
+                            mySensorManager.clearAngularVelocities();
                         break;
                     case R.id.rb_walking_downstairs:
                         actualUserActivity = UserActivity.WALKING_DOWNSTAIRS;
+                        if(mySensorManager != null)
+                            mySensorManager.clearAngularVelocities();
                         break;
                     case R.id.rb_laying:
                         actualUserActivity = UserActivity.LAYING;
+                        if(mySensorManager != null)
+                            mySensorManager.clearAngularVelocities();
                         break;
                 }
             }
