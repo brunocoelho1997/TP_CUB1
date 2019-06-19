@@ -137,6 +137,8 @@ public class FileManager {
         for(int i = 1; i <= 64; i++)
             header +="@ATTRIBUTE gyroscope" + i + " real\n";
 
+        header +="@ATTRIBUTE light {LOW, NORMAL, HIGHT}\n";
+
         header +="@ATTRIBUTE activity {WALKING,LAYING,SITTING,WALKING_DOWNSTAIRS,WALKING_UPSTAIRS}";
 
         header +="\n\n@DATA\n";
@@ -161,6 +163,9 @@ public class FileManager {
             str +="" + mySensorManager.getAngularVelocity(reGyroscope[i], imGyroscope[i]);
             str += ((i+1)==reGyroscope.length? "": ",");
         }
+
+        str += "," + mySensorManager.getLightMedian();
+
         str += "," + MainActivity.actualUserActivity;
 
         str +="\n";

@@ -5,6 +5,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -247,6 +248,9 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
             mLastLight = event.values[0];
             lastLightValues.add(mLastLight);
 
+            Log.d("MySensorManager", "MySensorManager max value of light sensor: " + sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT).getMaximumRange());
+            Log.d("MySensorManager", "Actual value: " + mLastLight);
+
             if(lastLightValues.size()>MIN_VALUES_TO_MEAN_MEDIAN)
                 lastLightValues.remove(0);
         }
@@ -289,6 +293,9 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
             this.listAngularVelocityAccelometer.clear();
     }
 
+    public String getLightMedian(){
+        return "HIGH";
+    }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
