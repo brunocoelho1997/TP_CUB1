@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     public static TextView tvSensorList;
     public static TextView tvInfoGyroscope;
     public static TextView tvInfoAccelometer;
+    public static TextView tvActualActivityPredicted;
     public static TextView tvInfoGps;
     public static Button btnStartCollectData;
     public static Button btnStopCollectingData;
@@ -77,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
         this.btnSaveToServer = findViewById(R.id.btn_send_data);
         this.tvInfoGyroscope = findViewById(R.id.tv_info_gyroscope);
         this.tvInfoAccelometer= findViewById(R.id.tv_info_accelometer);
-
+        this.tvActualActivityPredicted = findViewById(R.id.tv_info_predicted_activity);
         this.tvInfoGps = findViewById(R.id.tv_info_gps);
         this.tvSensorList = findViewById(R.id.tv_info_sensors);
         this.ckAutoMode = findViewById(R.id.ck_auto_mode);
@@ -135,30 +137,23 @@ public class MainActivity extends AppCompatActivity {
                 switch(button.getId()) {
                     case R.id.rb_walking:
                         actualUserActivity = UserActivity.WALKING;
-                        if(mySensorManager != null)
-                            mySensorManager.clearAngularVelocities();
                         break;
                     case R.id.rb_sitting:
                         actualUserActivity = UserActivity.SITTING;
-                        if(mySensorManager != null)
-                            mySensorManager.clearAngularVelocities();
                         break;
                     case R.id.rb_walking_upstairs:
                         actualUserActivity = UserActivity.WALKING_UPSTAIRS;
-                        if(mySensorManager != null)
-                            mySensorManager.clearAngularVelocities();
                         break;
                     case R.id.rb_walking_downstairs:
                         actualUserActivity = UserActivity.WALKING_DOWNSTAIRS;
-                        if(mySensorManager != null)
-                            mySensorManager.clearAngularVelocities();
                         break;
                     case R.id.rb_laying:
                         actualUserActivity = UserActivity.LAYING;
-                        if(mySensorManager != null)
-                            mySensorManager.clearAngularVelocities();
                         break;
                 }
+
+            if(mySensorManager != null)
+                mySensorManager.clearAngularVelocities();
             }
         });
 
@@ -170,6 +165,35 @@ public class MainActivity extends AppCompatActivity {
                 String uri = String.format(Locale.ENGLISH, "geo:%f,%f", myGps.getActualLatitude(), myGps.getActualLongitude());
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
                 v.getContext().startActivity(intent);
+            }
+        });
+
+        ckAutoMode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked)
+                {
+                    btnSaveToServer.setEnabled(false);
+                    btnStartCollectData.setEnabled(false);
+                    btnStopCollectingData.setEnabled(false);
+
+                    for (int i = 0; i < rgGroupRadio.getChildCount(); i++) {
+                        rgGroupRadio.getChildAt(i).setEnabled(false);
+                    }
+                    mySensorManager.startSensors();
+                }
+                else
+                {
+                    mySensorManager.stopSensors();
+
+                    for (int i = 0; i < rgGroupRadio.getChildCount(); i++) {
+                        rgGroupRadio.getChildAt(i).setEnabled(true);
+                    }
+                    if(FileManager.fileExists())
+                        btnSaveToServer.setEnabled(true);
+                    btnStartCollectData.setEnabled(true);
+                    //btnStopCollectingData.setEnabled(false);
+                }
             }
         });
     }

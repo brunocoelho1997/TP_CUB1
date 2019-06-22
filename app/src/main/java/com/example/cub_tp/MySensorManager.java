@@ -51,6 +51,8 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
     private List<Double> listAngularVelocityAccelometer;
 
 
+    private WekaManagement wekaManagement;
+
 
     public MySensorManager(SensorManager sensorManager) {
 
@@ -86,6 +88,8 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
         if (sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT) != null){
             this.light = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         }
+
+        this.wekaManagement = new WekaManagement();
     }
 
     public void startSensors(){
@@ -278,10 +282,31 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
             fft.fft(reGyroscope, imGyroscope);
             fft.fft(reAccelometer, imAccelometer);
 
-            FileManager.saveOnArffFile(reGyroscope, imGyroscope, reAccelometer, imAccelometer);
+            //all data are filtered and applied the fft
+            ArrayList<Float> accelometerDataProcessed = new ArrayList<>();
+            ArrayList<Float> gyroscopeDataProcessed = new ArrayList<>();
 
-            listAngularVelocityAccelometer.clear();
-            listAngularVelocityGyroscope.clear();
+            for(int i = 0; i < reAccelometer.length; i++)
+                accelometerDataProcessed.add(getAngularVelocity(reAccelometer[i], imAccelometer[i]));
+
+            for(int i = 0; i < reGyroscope.length; i++)
+                gyroscopeDataProcessed.add(getAngularVelocity(reGyroscope[i], imGyroscope[i]));
+
+            //if the AutoMode isn't checked only save the data on the file
+            if(MainActivity.ckAutoMode.isChecked()){
+                String predictedActivity;
+
+                //need to send to weka managemnet the getAngularVelocity(reGyroscope[i], imGyroscope[i])
+                predictedActivity = wekaManagement.predict(accelometerDataProcessed,gyroscopeDataProcessed,getLightMedian());
+
+                MainActivity.tvActualActivityPredicted.setText("" + predictedActivity);
+
+            }
+            else
+                FileManager.saveOnArffFile(accelometerDataProcessed,gyroscopeDataProcessed,getLightMedian(), MainActivity.actualUserActivity.toString());
+
+
+            clearAngularVelocities();
         }
     }
 
@@ -294,7 +319,7 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
     }
 
     public String getLightMedian(){
-        return "HIGH";
+        return Config.LIGHT_NORMAL;
     }
 
     @Override

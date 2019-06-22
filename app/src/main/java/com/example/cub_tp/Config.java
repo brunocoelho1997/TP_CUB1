@@ -11,6 +11,7 @@ public class Config {
     public static String FILENAME = "tmp";
     public static String FILE_EXTENSION = ".csv";
     public static String FILE_EXTENSION_ARFF = ".arff";
+    public static String FILENAME_TRAINED_MODEL = "trainedModel";
 
 
     public static String FILENAME_SSID = "ssid";
@@ -22,5 +23,10 @@ public class Config {
 
     public static int MIN_VALUES_TO_MEAN_MEDIAN = 5;
     public static int MIN_VALUES_TO_FFT = 64;
+
+    public static final String LIGHT_LOW = "LOW";
+    public static final String LIGHT_NORMAL = "NORMAL";
+    public static final String LIGHT_HIGH = "HIGH";
+
 
 }

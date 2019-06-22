@@ -46,7 +46,7 @@ public class FileManager {
         return (fileCsv.exists() || fileArff.exists());
     }
 
-    public static void saveOnArffFile(double[] reGyroscope, double[] imGyroscope, double[] reAccelometer, double[] imAccelometer){
+    public static void saveOnArffFile(ArrayList<Float> accelometerDataProcessed, ArrayList<Float> gyroscopeDataProcessed, String lightMedian, String activity){
 
         try {
             String finalPath = ANDROID_BASE_FILE_PATH + FILENAME + FILE_EXTENSION_ARFF;
@@ -60,7 +60,7 @@ public class FileManager {
 
             fos = new FileOutputStream(file, true);
 
-            String content = getValuesFromAllSensorsToArffFile(reGyroscope, imGyroscope, reAccelometer, imAccelometer);
+            String content = getValuesFromAllSensorsToArffFile(accelometerDataProcessed,gyroscopeDataProcessed,lightMedian,activity);
 
             fos.write(content.toString().getBytes());
             fos.close();
@@ -137,9 +137,17 @@ public class FileManager {
         for(int i = 1; i <= 64; i++)
             header +="@ATTRIBUTE gyroscope" + i + " real\n";
 
-        header +="@ATTRIBUTE light {LOW, NORMAL, HIGHT}\n";
+        header +="@ATTRIBUTE light {";
+        header += LIGHT_LOW + ",";
+        header += LIGHT_NORMAL + ",";
+        header += LIGHT_HIGH + "}\n";
 
-        header +="@ATTRIBUTE activity {WALKING,LAYING,SITTING,WALKING_DOWNSTAIRS,WALKING_UPSTAIRS}";
+        header +="@ATTRIBUTE activity {";
+        header += UserActivity.WALKING + ",";
+        header += UserActivity.LAYING + ",";
+        header += UserActivity.SITTING + ",";
+        header += UserActivity.WALKING_DOWNSTAIRS + ",";
+        header += UserActivity.WALKING_UPSTAIRS + "}";
 
         header +="\n\n@DATA\n";
 
@@ -147,26 +155,26 @@ public class FileManager {
         fos.close();
     }
 
-    private static String getValuesFromAllSensorsToArffFile(double[] reGyroscope, double[] imGyroscope, double[] reAccelometer, double[] imAccelometer) {
+    private static String getValuesFromAllSensorsToArffFile(ArrayList<Float> accelometerDataProcessed, ArrayList<Float> gyroscopeDataProcessed, String lightMedian, String activity) {
         String str ="";
 
-        for(int i = 0; i < reAccelometer.length; i++)
+        for(int i = 0; i < accelometerDataProcessed.size(); i++)
         {
-            str +="" + mySensorManager.getAngularVelocity(reAccelometer[i], imAccelometer[i]);
-            str += ((i+1)==reAccelometer.length? "": ",");
+            str +="" + accelometerDataProcessed.get(i);
+            str += ((i+1)==accelometerDataProcessed.size()? "": ",");
         }
 
         str+=",";
 
-        for(int i = 0; i < reGyroscope.length; i++)
+        for(int i = 0; i < gyroscopeDataProcessed.size(); i++)
         {
-            str +="" + mySensorManager.getAngularVelocity(reGyroscope[i], imGyroscope[i]);
-            str += ((i+1)==reGyroscope.length? "": ",");
+            str +="" + gyroscopeDataProcessed.get(i);
+            str += ((i+1)==gyroscopeDataProcessed.size()? "": ",");
         }
 
-        str += "," + mySensorManager.getLightMedian();
+        str += "," + lightMedian;
 
-        str += "," + MainActivity.actualUserActivity;
+        str += "," + (activity.isEmpty()? "?": activity);
 
         str +="\n";
         return str;
