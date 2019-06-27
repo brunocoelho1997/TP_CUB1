@@ -28,18 +28,18 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
 
     private static float mLastXGyroscope, mLastYGyroscope, mLastZGyroscope; //used by gyroscope
     private static float mLastLight; //used by light
-    private final float NOISE = (float) 2.0; //used by gyroscope
+    private final float NOISE = (float) 2.0; //used by gyroscope and accelometer
 
     private static float lastXAccelometer, lastYAccelometer, lastZAccelometer;
 
     //list to save the 10 last elements of gyroscope to apply mean and median
-    private List<Float> lastXGyroscopeValues;
-    private List<Float> lastYGyroscopeValues;
-    private List<Float> lastZGyroscopeValues;
+    private List<Float> lastXGyroscopeValuesToMedian;
+    private List<Float> lastYGyroscopeValuesToMedian;
+    private List<Float> lastZGyroscopeValuesToMedian;
     //list to save the 10 last elements of accelometer to apply mean and median
-    private List<Float> lastXAccelometerValues;
-    private List<Float> lastYAccelometerValues;
-    private List<Float> lastZAccelometerValues;
+    private List<Float> lastXAccelometerValuesToMedian;
+    private List<Float> lastYAccelometerValuesToMedian;
+    private List<Float> lastZAccelometerValuesToMedian;
 
     //list to save the 10 last elements of light to apply mean and median
     private List<Float> lastLightValues;
@@ -50,8 +50,12 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
     //list to save the 10 last elements of accelometer to apply fft
     private List<Double> listAngularVelocityAccelometer;
 
+    //all data are filtered and applied the fft from sensors
+    private ArrayList<Float> lastAccelometerDataProcessed = new ArrayList<>();
+    private ArrayList<Float> lastGyroscopeDataProcessed = new ArrayList<>();
 
     private WekaManagement wekaManagement;
+
 
 
     public MySensorManager(SensorManager sensorManager) {
@@ -64,12 +68,12 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
         }
 
         //define arraylists for mean and median
-        this.lastXGyroscopeValues = new ArrayList<>();
-        this.lastYGyroscopeValues = new ArrayList<>();
-        this.lastZGyroscopeValues = new ArrayList<>();
-        this.lastXAccelometerValues = new ArrayList<>();
-        this.lastYAccelometerValues = new ArrayList<>();
-        this.lastZAccelometerValues = new ArrayList<>();
+        this.lastXGyroscopeValuesToMedian = new ArrayList<>();
+        this.lastYGyroscopeValuesToMedian = new ArrayList<>();
+        this.lastZGyroscopeValuesToMedian = new ArrayList<>();
+        this.lastXAccelometerValuesToMedian = new ArrayList<>();
+        this.lastYAccelometerValuesToMedian = new ArrayList<>();
+        this.lastZAccelometerValuesToMedian = new ArrayList<>();
         this.lastLightValues = new ArrayList<>();
         this.listAngularVelocityGyroscope = new ArrayList<>();
         this.listAngularVelocityAccelometer = new ArrayList<>();
@@ -108,8 +112,11 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
 
         //applyLowPassFilter(linear_acceleration, event);
 
-        boolean sensorChanged = false;
+        boolean accelometerSensorChanged = false;
+        boolean gyroscopeSensorChanged = false;
 
+        //flag when has values to write in file
+        boolean newValuesFftToWrite = false;
 
         if(event.sensor.getType() == Sensor.TYPE_GYROSCOPE)
         {
@@ -137,7 +144,7 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
                 else
                 {
                     mLastXGyroscope = x;
-                    sensorChanged = true;
+                    gyroscopeSensorChanged = true;
                 }
 
                 if (deltaY < NOISE)
@@ -145,7 +152,7 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
                 else
                 {
                     mLastYGyroscope = y;
-                    sensorChanged = true;
+                    gyroscopeSensorChanged = true;
                 }
 
                 if (deltaZ < NOISE)
@@ -153,32 +160,35 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
                 else
                 {
                     mLastZGyroscope = z;
-                    sensorChanged = true;
+                    gyroscopeSensorChanged = true;
                 }
             }
 
-            lastXGyroscopeValues.add(mLastXGyroscope);
-            lastYGyroscopeValues.add(mLastYGyroscope);
-            lastZGyroscopeValues.add(mLastZGyroscope);
-
-            if(lastXGyroscopeValues.size()>MIN_VALUES_TO_MEAN_MEDIAN)
-                lastXGyroscopeValues.remove(0);
-
-            if(lastYGyroscopeValues.size()>MIN_VALUES_TO_MEAN_MEDIAN)
-                lastYGyroscopeValues.remove(0);
-
-            if(lastZGyroscopeValues.size()>MIN_VALUES_TO_MEAN_MEDIAN)
-                lastZGyroscopeValues.remove(0);
-
-            if(lastXGyroscopeValues.size() >= MIN_VALUES_TO_MEAN_MEDIAN && lastYGyroscopeValues.size() >= MIN_VALUES_TO_MEAN_MEDIAN && lastZGyroscopeValues.size()>= MIN_VALUES_TO_MEAN_MEDIAN )
+            if(gyroscopeSensorChanged)
             {
-                float angularVelocity = getAngularVelocity(getMedian(lastXGyroscopeValues),getMedian(lastYGyroscopeValues),getMedian(lastZGyroscopeValues));
+                lastXGyroscopeValuesToMedian.add(mLastXGyroscope);
+                lastYGyroscopeValuesToMedian.add(mLastYGyroscope);
+                lastZGyroscopeValuesToMedian.add(mLastZGyroscope);
+                MainActivity.tvInfoGyroscope.setText("Gyroscope: x= " + mLastXGyroscope + " y= " + mLastYGyroscope + " z= " + mLastZGyroscope);
+            }
+            else
+                MainActivity.tvInfoGyroscope.setText("Gyroscope:");
+
+            if(lastXGyroscopeValuesToMedian.size()>MIN_VALUES_TO_MEAN_MEDIAN)
+                lastXGyroscopeValuesToMedian.remove(0);
+
+            if(lastYGyroscopeValuesToMedian.size()>MIN_VALUES_TO_MEAN_MEDIAN)
+                lastYGyroscopeValuesToMedian.remove(0);
+
+            if(lastZGyroscopeValuesToMedian.size()>MIN_VALUES_TO_MEAN_MEDIAN)
+                lastZGyroscopeValuesToMedian.remove(0);
+
+            if(lastXGyroscopeValuesToMedian.size() >= MIN_VALUES_TO_MEAN_MEDIAN && lastYGyroscopeValuesToMedian.size() >= MIN_VALUES_TO_MEAN_MEDIAN && lastZGyroscopeValuesToMedian.size()>= MIN_VALUES_TO_MEAN_MEDIAN)
+            {
+                float angularVelocity = getAngularVelocity(getMedian(lastXGyroscopeValuesToMedian),getMedian(lastYGyroscopeValuesToMedian),getMedian(lastZGyroscopeValuesToMedian));
                 listAngularVelocityGyroscope.add((double) angularVelocity);
-                if(listAngularVelocityGyroscope.size()>MIN_VALUES_TO_FFT)
-                    listAngularVelocityGyroscope.remove(0);
             }
 
-            MainActivity.tvInfoGyroscope.setText("Gyroscope: x= " + mLastXGyroscope + " y= " + mLastYGyroscope + " z= " + mLastZGyroscope);
         }
         else if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
         {
@@ -205,7 +215,7 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
                 else
                 {
                     lastXAccelometer = x;
-                    sensorChanged = true;
+                    accelometerSensorChanged = true;
 
                 }
 
@@ -213,7 +223,7 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
                     deltaY = (float)0.0;
                 else
                 {
-                    sensorChanged = true;
+                    accelometerSensorChanged = true;
                     lastYAccelometer = y;
                 }
 
@@ -222,92 +232,122 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
                     deltaZ = (float)0.0;
                 else
                 {
-                    sensorChanged = true;
+                    accelometerSensorChanged = true;
                     lastZAccelometer = z;
                 }
             }
 
-            lastXAccelometerValues.add(lastXAccelometer);
-            lastYAccelometerValues.add(lastYAccelometer);
-            lastZAccelometerValues.add(lastZAccelometer);
-
-            if(lastXAccelometerValues.size()>MIN_VALUES_TO_MEAN_MEDIAN)
-                lastXAccelometerValues.remove(0);
-            if(lastYAccelometerValues.size()>MIN_VALUES_TO_MEAN_MEDIAN)
-                lastYAccelometerValues.remove(0);
-            if(lastZAccelometerValues.size()>MIN_VALUES_TO_MEAN_MEDIAN)
-                lastZAccelometerValues.remove(0);
-
-            if(lastXAccelometerValues.size() >= MIN_VALUES_TO_MEAN_MEDIAN && lastYAccelometerValues.size() >= MIN_VALUES_TO_MEAN_MEDIAN && lastZAccelometerValues.size()>= MIN_VALUES_TO_MEAN_MEDIAN )
+            if(accelometerSensorChanged)
             {
-                float angularVelocity = getAngularVelocity(getMedian(lastXAccelometerValues),getMedian(lastYAccelometerValues),getMedian(lastZAccelometerValues));
-                listAngularVelocityAccelometer.add((double) angularVelocity);
-                if(listAngularVelocityAccelometer.size()>MIN_VALUES_TO_FFT)
-                    listAngularVelocityAccelometer.remove(0);
+                lastXAccelometerValuesToMedian.add(lastXAccelometer);
+                lastYAccelometerValuesToMedian.add(lastYAccelometer);
+                lastZAccelometerValuesToMedian.add(lastZAccelometer);
+
+                MainActivity.tvInfoAccelometer.setText("Accelometer: x= " + lastXAccelometer + " y= " + lastYAccelometer + " z= " + lastZAccelometer);
             }
-            MainActivity.tvInfoAccelometer.setText("Accelometer: x= " + lastXAccelometer + " y= " + lastYAccelometer + " z= " + lastZAccelometer);
+            else
+                MainActivity.tvInfoAccelometer.setText("Accelometer: ");
+
+
+
+            if(lastXAccelometerValuesToMedian.size()>MIN_VALUES_TO_MEAN_MEDIAN)
+                lastXAccelometerValuesToMedian.remove(0);
+            if(lastYAccelometerValuesToMedian.size()>MIN_VALUES_TO_MEAN_MEDIAN)
+                lastYAccelometerValuesToMedian.remove(0);
+            if(lastZAccelometerValuesToMedian.size()>MIN_VALUES_TO_MEAN_MEDIAN)
+                lastZAccelometerValuesToMedian.remove(0);
+
+            if(lastXAccelometerValuesToMedian.size() >= MIN_VALUES_TO_MEAN_MEDIAN && lastYAccelometerValuesToMedian.size() >= MIN_VALUES_TO_MEAN_MEDIAN && lastZAccelometerValuesToMedian.size()>= MIN_VALUES_TO_MEAN_MEDIAN )
+            {
+                float angularVelocity = getAngularVelocity(getMedian(lastXAccelometerValuesToMedian),getMedian(lastYAccelometerValuesToMedian),getMedian(lastZAccelometerValuesToMedian));
+                listAngularVelocityAccelometer.add((double) angularVelocity);
+            }
         }
         else if(event.sensor.getType() == Sensor.TYPE_LIGHT)
         {
             mLastLight = event.values[0];
-            lastLightValues.add(mLastLight);
 
-            Log.d("MySensorManager", "MySensorManager max value of light sensor: " + sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT).getMaximumRange());
-            Log.d("MySensorManager", "Actual value: " + mLastLight);
+            //Log.d("MySensorManager", "MySensorManager max value of light sensor: " + sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT).getMaximumRange());
+            //Log.d("MySensorManager", "Actual value: " + mLastLight);
+
+
+            if(mLastLight > Config.LIGHT_MAX_VALUE)
+                mLastLight = Config.LIGHT_MAX_VALUE;
+
+            lastLightValues.add(mLastLight);
 
             if(lastLightValues.size()>MIN_VALUES_TO_MEAN_MEDIAN)
                 lastLightValues.remove(0);
+
+            Log.d("MySensorManager", "lastLightValues: " + listAngularVelocityAccelometer);
+
         }
 
         //if(sensorChanged)
             //FileManager.saveOnCsvFile();
 
-        if(listAngularVelocityGyroscope.size() >= MIN_VALUES_TO_FFT && listAngularVelocityAccelometer.size() >= MIN_VALUES_TO_FFT)
+        if(listAngularVelocityAccelometer.size() >= MIN_VALUES_TO_FFT)
         {
+            Log.d("MySensorManager", "listAngularVelocityAccelometer: " + listAngularVelocityAccelometer);
+
             Fft fft = new Fft(MIN_VALUES_TO_FFT);
 
-            double[] window = fft.getWindow();
+            double[] re = new double[MIN_VALUES_TO_FFT];
+            double[] im = new double[MIN_VALUES_TO_FFT];
+            for (int i = 0; i < re.length; i++)
+                re[i] = listAngularVelocityAccelometer.get(i);
 
-            double[] reGyroscope = new double[MIN_VALUES_TO_FFT];
-            double[] imGyroscope = new double[MIN_VALUES_TO_FFT];
+            fft.fft(re, im);
 
-            for (int i = 0; i < reGyroscope.length; i++)
-                reGyroscope[i] = listAngularVelocityGyroscope.get(i);
+            listAngularVelocityAccelometer.clear();
+            lastAccelometerDataProcessed.clear();
+            for(int i = 0; i < re.length; i++)
+                lastAccelometerDataProcessed.add(getAngularVelocity(re[i], im[i]));
 
-            double[] reAccelometer = new double[MIN_VALUES_TO_FFT];
-            double[] imAccelometer = new double[MIN_VALUES_TO_FFT];
-            for (int i = 0; i < reAccelometer.length; i++)
-                reAccelometer[i] = listAngularVelocityAccelometer.get(i);
+            newValuesFftToWrite = true;
 
-            fft.fft(reGyroscope, imGyroscope);
-            fft.fft(reAccelometer, imAccelometer);
+        }
+        if(listAngularVelocityGyroscope.size() >= MIN_VALUES_TO_FFT)
+        {
 
-            //all data are filtered and applied the fft
-            ArrayList<Float> accelometerDataProcessed = new ArrayList<>();
-            ArrayList<Float> gyroscopeDataProcessed = new ArrayList<>();
+            Log.d("MySensorManager", "listAngularVelocityGyroscope: " + listAngularVelocityGyroscope);
 
-            for(int i = 0; i < reAccelometer.length; i++)
-                accelometerDataProcessed.add(getAngularVelocity(reAccelometer[i], imAccelometer[i]));
+            Fft fft = new Fft(MIN_VALUES_TO_FFT);
 
-            for(int i = 0; i < reGyroscope.length; i++)
-                gyroscopeDataProcessed.add(getAngularVelocity(reGyroscope[i], imGyroscope[i]));
+            double[] re = new double[MIN_VALUES_TO_FFT];
+            double[] im = new double[MIN_VALUES_TO_FFT];
+            for (int i = 0; i < re.length; i++)
+                re[i] = listAngularVelocityGyroscope.get(i);
 
+            fft.fft(re, im);
+
+            listAngularVelocityGyroscope.clear();
+            lastGyroscopeDataProcessed.clear();
+            for(int i = 0; i < re.length; i++)
+                lastGyroscopeDataProcessed.add(getAngularVelocity(re[i], im[i]));
+
+            newValuesFftToWrite = true;
+        }
+
+        //TODO: verify this
+        //if(accelometerSensorChanged == false || gyroscopeSensorChanged == false)
+            //return;
+
+        if(newValuesFftToWrite && lastGyroscopeDataProcessed.size() >= MIN_VALUES_TO_FFT && lastAccelometerDataProcessed.size() >= MIN_VALUES_TO_FFT)
+        {
             //if the AutoMode isn't checked only save the data on the file
             if(MainActivity.ckAutoMode.isChecked()){
                 String predictedActivity;
 
                 //need to send to weka managemnet the getAngularVelocity(reGyroscope[i], imGyroscope[i])
-                predictedActivity = wekaManagement.predict(accelometerDataProcessed,gyroscopeDataProcessed,getLightMedian());
-
+                predictedActivity = wekaManagement.predict(lastAccelometerDataProcessed,lastGyroscopeDataProcessed, getLightScale());
                 MainActivity.tvActualActivityPredicted.setText("" + predictedActivity);
-
             }
             else
-                FileManager.saveOnArffFile(accelometerDataProcessed,gyroscopeDataProcessed,getLightMedian(), MainActivity.actualUserActivity.toString());
+                FileManager.saveOnArffFile(lastAccelometerDataProcessed,lastGyroscopeDataProcessed, getLightScale(), MainActivity.actualUserActivity.toString());
 
-
-            clearAngularVelocities();
         }
+
     }
 
     public void clearAngularVelocities(){
@@ -316,10 +356,30 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
 
         if(this.listAngularVelocityAccelometer != null)
             this.listAngularVelocityAccelometer.clear();
+
+        if(this.lastAccelometerDataProcessed != null)
+            this.lastAccelometerDataProcessed.clear();
+
+        if(this.lastGyroscopeDataProcessed!= null)
+            this.lastGyroscopeDataProcessed.clear();
+
     }
 
-    public String getLightMedian(){
-        return Config.LIGHT_NORMAL;
+    public String getLightScale(){
+
+        return Config.LIGHT_HIGH;
+
+        /*
+        float median = getMedian(lastLightValues);
+
+        float tmp = median/Config.LIGHT_MAX_VALUE;
+
+        if(tmp <= 0.33)
+            return Config.LIGHT_LOW;
+        else if(tmp <= 0.66)
+            return Config.LIGHT_NORMAL;
+        else
+            return Config.LIGHT_HIGH;*/
     }
 
     @Override

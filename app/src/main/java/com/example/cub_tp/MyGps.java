@@ -64,7 +64,7 @@ public class MyGps {
                 //Toast.makeText(context, "Network Provider update", Toast.LENGTH_SHORT).show();
 
                 //every time we get a new location we save on the file
-                FileManager.saveOnCsvFile();
+                //FileManager.saveOnCsvFile();
             }
 
             public void onStatusChanged(String provider, int status, Bundle extras) {

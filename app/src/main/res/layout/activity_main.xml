@@ -79,6 +79,13 @@
 
         <TextView
             android:layout_marginTop="10sp"
+            android:id="@+id/tv_info_light"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_below="@+id/tv_info_gyroscope" />
+
+        <TextView
+            android:layout_marginTop="10sp"
             android:id="@+id/tv_info_gps"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"

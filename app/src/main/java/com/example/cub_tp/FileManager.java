@@ -46,7 +46,7 @@ public class FileManager {
         return (fileCsv.exists() || fileArff.exists());
     }
 
-    public static void saveOnArffFile(ArrayList<Float> accelometerDataProcessed, ArrayList<Float> gyroscopeDataProcessed, String lightMedian, String activity){
+    public static void saveOnArffFile(ArrayList<Float> lastAccelometerDataProcessed, ArrayList<Float> lastGyroscopeDataProcessed, String lightMedian, String activity){
 
         try {
             String finalPath = ANDROID_BASE_FILE_PATH + FILENAME + FILE_EXTENSION_ARFF;
@@ -60,7 +60,7 @@ public class FileManager {
 
             fos = new FileOutputStream(file, true);
 
-            String content = getValuesFromAllSensorsToArffFile(accelometerDataProcessed,gyroscopeDataProcessed,lightMedian,activity);
+            String content = getValuesFromAllSensorsToArffFile(lastAccelometerDataProcessed,lastGyroscopeDataProcessed,lightMedian,activity);
 
             fos.write(content.toString().getBytes());
             fos.close();
@@ -155,21 +155,21 @@ public class FileManager {
         fos.close();
     }
 
-    private static String getValuesFromAllSensorsToArffFile(ArrayList<Float> accelometerDataProcessed, ArrayList<Float> gyroscopeDataProcessed, String lightMedian, String activity) {
+    private static String getValuesFromAllSensorsToArffFile(ArrayList<Float> lastAccelometerDataProcessed, ArrayList<Float> lastGyroscopeDataProcessed, String lightMedian, String activity) {
         String str ="";
 
-        for(int i = 0; i < accelometerDataProcessed.size(); i++)
+        for(int i = 0; i < lastAccelometerDataProcessed.size(); i++)
         {
-            str +="" + accelometerDataProcessed.get(i);
-            str += ((i+1)==accelometerDataProcessed.size()? "": ",");
+            str +="" + lastAccelometerDataProcessed.get(i);
+            str += ((i+1)==lastAccelometerDataProcessed.size()? "": ",");
         }
 
         str+=",";
 
-        for(int i = 0; i < gyroscopeDataProcessed.size(); i++)
+        for(int i = 0; i < lastGyroscopeDataProcessed.size(); i++)
         {
-            str +="" + gyroscopeDataProcessed.get(i);
-            str += ((i+1)==gyroscopeDataProcessed.size()? "": ",");
+            str +="" + lastGyroscopeDataProcessed.get(i);
+            str += ((i+1)==lastGyroscopeDataProcessed.size()? "": ",");
         }
 
         str += "," + lightMedian;

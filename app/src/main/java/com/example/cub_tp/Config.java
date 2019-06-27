@@ -21,12 +21,13 @@ public class Config {
     public static String FILENAME_SERVER_CONFIG = "server_config";
     public static String FILE_EXTENSION_SERVER_CONFIG = ".txt";
 
-    public static int MIN_VALUES_TO_MEAN_MEDIAN = 5;
+    public static int MIN_VALUES_TO_MEAN_MEDIAN = 10;
     public static int MIN_VALUES_TO_FFT = 64;
 
     public static final String LIGHT_LOW = "LOW";
     public static final String LIGHT_NORMAL = "NORMAL";
     public static final String LIGHT_HIGH = "HIGH";
+    public static final int LIGHT_MAX_VALUE = 10000;
 
 
 }
