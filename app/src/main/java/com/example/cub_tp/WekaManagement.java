@@ -1,5 +1,6 @@
 package com.example.cub_tp;
 
+import android.content.res.AssetManager;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -20,31 +21,31 @@ public class WekaManagement {
     //public Instance getInstance();
 
 
-    public String predict(ArrayList<Float> accelometerDataProcessed, ArrayList<Float> gyroscopeDataProcessed, String lightMedian)  {
+    public String predict(ArrayList<Float> lastAccelometerDataProcessed, ArrayList<Float> lastGyroscopeDataProcessed, String lightMedian)  {
 
         try{
             Log.d("WekaManagement", "Predicting...");
 
-            String filePath = Config.ANDROID_BASE_FILE_PATH + Config.FILENAME_TRAINED_MODEL + Config.FILE_EXTENSION_ARFF;
+            String filePath = Config.ANDROID_BASE_FILE_PATH + Config.FILENAME_TRAINED_MODEL + Config.FILE_EXTENSION_MODEL;
 
             // read model and header
-            Vector v = (Vector) SerializationHelper.read(filePath);
-            Classifier cl = (Classifier) v.get(0);
-            Instances header = (Instances) v.get(1);
+            Classifier cl = (Classifier) (Classifier) weka.core.SerializationHelper.read(filePath);
 
             // Create empty instance with three attribute values
-            Instance inst = new DenseInstance(3);
+            Instance inst = new DenseInstance(lastAccelometerDataProcessed.size() + lastGyroscopeDataProcessed.size() + 1 + 1);
 
             // Set instance's values for the attributes (all 64 values of accelometer and gyroscope and the light
-            for(int i = 1; i <= 64; i++)
-                inst.setValue(new Attribute("accelometer" + i), accelometerDataProcessed.get(i-1));
+            for(int i = 0; i < 64; i++)
+                inst.setValue(new Attribute("accelometer" + (i+1)), lastAccelometerDataProcessed.get(i));
 
-            for(int i = 1; i <= 64; i++)
-                inst.setValue(new Attribute("gyroscope" + i), gyroscopeDataProcessed.get(i-1));
+            for(int i = 0; i < 64; i++)
+                inst.setValue(new Attribute("gyroscope" + (i+1)), lastGyroscopeDataProcessed.get(i));
 
             inst.setValue(new Attribute("light"), lightMedian);
 
             inst.setValue(new Attribute("activity"), "?");
+
+            Log.d("WekaManagement", "Instance: " + inst);
 
             if (inst.classIndex() == -1)
                 inst.setMissing(inst.numAttributes() - 1);

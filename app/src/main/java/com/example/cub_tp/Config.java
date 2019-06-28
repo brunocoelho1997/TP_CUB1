@@ -12,6 +12,8 @@ public class Config {
     public static String FILE_EXTENSION = ".csv";
     public static String FILE_EXTENSION_ARFF = ".arff";
     public static String FILENAME_TRAINED_MODEL = "trainedModel";
+    public static String FILE_EXTENSION_MODEL = ".model";
+
 
 
     public static String FILENAME_SSID = "ssid";
@@ -22,7 +24,8 @@ public class Config {
     public static String FILE_EXTENSION_SERVER_CONFIG = ".txt";
 
     public static int MIN_VALUES_TO_MEAN_MEDIAN = 10;
-    public static int MIN_VALUES_TO_FFT = 64;
+    public static int MIN_VALUES_TO_FFT = 16;
+    public static float NOISE = (float) 0.01; //used by gyroscope and accelometer
 
     public static final String LIGHT_LOW = "LOW";
     public static final String LIGHT_NORMAL = "NORMAL";

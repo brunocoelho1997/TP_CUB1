@@ -13,6 +13,7 @@ import java.util.List;
 
 import static com.example.cub_tp.Config.MIN_VALUES_TO_FFT;
 import static com.example.cub_tp.Config.MIN_VALUES_TO_MEAN_MEDIAN;
+import static com.example.cub_tp.Config.NOISE;
 
 
 public class MySensorManager extends AppCompatActivity implements SensorEventListener {
@@ -28,7 +29,7 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
 
     private static float mLastXGyroscope, mLastYGyroscope, mLastZGyroscope; //used by gyroscope
     private static float mLastLight; //used by light
-    private final float NOISE = (float) 2.0; //used by gyroscope and accelometer
+
 
     private static float lastXAccelometer, lastYAccelometer, lastZAccelometer;
 
@@ -166,6 +167,8 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
 
             if(gyroscopeSensorChanged)
             {
+                //Log.d("MySensorManager", "gyroscopeSensorChanged: Gyroscope: x= " + mLastXGyroscope + " y= " + mLastYGyroscope + " z= " + mLastZGyroscope);
+
                 lastXGyroscopeValuesToMedian.add(mLastXGyroscope);
                 lastYGyroscopeValuesToMedian.add(mLastYGyroscope);
                 lastZGyroscopeValuesToMedian.add(mLastZGyroscope);
@@ -239,6 +242,8 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
 
             if(accelometerSensorChanged)
             {
+                //Log.d("MySensorManager", "accelometerSensorChanged: Accelometer: x= " + lastXAccelometer + " y= " + lastYAccelometer + " z= " + lastZAccelometer);
+
                 lastXAccelometerValuesToMedian.add(lastXAccelometer);
                 lastYAccelometerValuesToMedian.add(lastYAccelometer);
                 lastZAccelometerValuesToMedian.add(lastZAccelometer);
@@ -279,7 +284,7 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
             if(lastLightValues.size()>MIN_VALUES_TO_MEAN_MEDIAN)
                 lastLightValues.remove(0);
 
-            Log.d("MySensorManager", "lastLightValues: " + listAngularVelocityAccelometer);
+            MainActivity.tvInfoLight.setText("Light: " + mLastLight);
 
         }
 
@@ -288,7 +293,7 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
 
         if(listAngularVelocityAccelometer.size() >= MIN_VALUES_TO_FFT)
         {
-            Log.d("MySensorManager", "listAngularVelocityAccelometer: " + listAngularVelocityAccelometer);
+            Log.d("MySensorManager", "lastAccelometerDataProcessed: " + lastAccelometerDataProcessed);
 
             Fft fft = new Fft(MIN_VALUES_TO_FFT);
 
@@ -297,7 +302,9 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
             for (int i = 0; i < re.length; i++)
                 re[i] = listAngularVelocityAccelometer.get(i);
 
+            Log.d("MySensorManager", "log date before fft acc");
             fft.fft(re, im);
+            Log.d("MySensorManager", "log date: after fft acc");
 
             listAngularVelocityAccelometer.clear();
             lastAccelometerDataProcessed.clear();
@@ -310,7 +317,7 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
         if(listAngularVelocityGyroscope.size() >= MIN_VALUES_TO_FFT)
         {
 
-            Log.d("MySensorManager", "listAngularVelocityGyroscope: " + listAngularVelocityGyroscope);
+            Log.d("MySensorManager", "lastGyroscopeDataProcessed: " + lastGyroscopeDataProcessed);
 
             Fft fft = new Fft(MIN_VALUES_TO_FFT);
 
@@ -319,7 +326,9 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
             for (int i = 0; i < re.length; i++)
                 re[i] = listAngularVelocityGyroscope.get(i);
 
+            Log.d("MySensorManager", "log date before fft gyro");
             fft.fft(re, im);
+            Log.d("MySensorManager", "log date: after fft gyro");
 
             listAngularVelocityGyroscope.clear();
             lastGyroscopeDataProcessed.clear();
@@ -343,9 +352,17 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
                 predictedActivity = wekaManagement.predict(lastAccelometerDataProcessed,lastGyroscopeDataProcessed, getLightScale());
                 MainActivity.tvActualActivityPredicted.setText("" + predictedActivity);
             }
-            else
-                FileManager.saveOnArffFile(lastAccelometerDataProcessed,lastGyroscopeDataProcessed, getLightScale(), MainActivity.actualUserActivity.toString());
 
+            Log.d("MySensorManager", "log date: before file");
+            FileManager.saveOnArffFile(lastAccelometerDataProcessed,lastGyroscopeDataProcessed, getLightScale(), MainActivity.actualUserActivity.toString());
+            Log.d("MySensorManager", "log date: after file");
+
+
+            //TODO COLOCAR A ESCRITA EM ASINCRONA
+            //TODO: clear do 64 DO FFT remover os 1ºs 32 valores...
+            //TODO: ver o novo noise...
+            //TODO: os 0s... corrigi-los!!!
+            //todo: Uma leitura a cada 2 segundos
         }
 
     }
@@ -367,19 +384,20 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
 
     public String getLightScale(){
 
-        return Config.LIGHT_HIGH;
+        float tmp;
 
-        /*
-        float median = getMedian(lastLightValues);
+        //if the lastLight Values does not have 10 values will use the mean
+        if(lastLightValues.size() >= MIN_VALUES_TO_MEAN_MEDIAN)
+            tmp = getMedian(lastLightValues);
+        else
+            tmp = getMean(lastLightValues);
 
-        float tmp = median/Config.LIGHT_MAX_VALUE;
-
-        if(tmp <= 0.33)
+        if(tmp <= 50)
             return Config.LIGHT_LOW;
-        else if(tmp <= 0.66)
+        else if(tmp <= 150)
             return Config.LIGHT_NORMAL;
         else
-            return Config.LIGHT_HIGH;*/
+            return Config.LIGHT_HIGH;
     }
 
     @Override
@@ -387,12 +405,7 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
         // Do something here if sensor accuracy changes.
     }
 
-    private Float getMedian(List<Float> valuesArrayList){
-        if(valuesArrayList == null)
-            return null;
-
-        if(valuesArrayList.size() < MIN_VALUES_TO_MEAN_MEDIAN)
-            return null;
+    private float getMedian(List<Float> valuesArrayList){
 
         Float[] itemsArray = new Float[valuesArrayList.size()];
         itemsArray = valuesArrayList.toArray(itemsArray);
@@ -411,10 +424,7 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
         return Float.valueOf(tmp);
     }
 
-    private Float getMean(List<Float> valuesArrayList, int sizeOfArray){
-
-        if(sizeOfArray < MIN_VALUES_TO_MEAN_MEDIAN)
-            return null;
+    private float getMean(List<Float> valuesArrayList){
 
         float sum = 0;
 
