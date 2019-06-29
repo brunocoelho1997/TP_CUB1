@@ -1,22 +1,15 @@
 package com.example.cub_tp;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
-import android.os.Build;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -25,7 +18,6 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
-import java.util.List;
 import java.util.Locale;
 
 import static com.example.cub_tp.Config.*;
@@ -42,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     //layout vars
     public static RadioGroup rgGroupRadio;
     public static Button btnSaveToServer;
+    public static Button btnDownloadFromServer;
     public static TextView tvSensorList;
     public static TextView tvInfoGyroscope;
     public static TextView tvInfoAccelometer;
@@ -78,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
         this.btnStartCollectData = findViewById(R.id.btn_start_collect);
         this.btnStopCollectingData = findViewById(R.id.btn_stop_collect);
         this.btnSaveToServer = findViewById(R.id.btn_send_data);
+        this.btnDownloadFromServer = findViewById(R.id.btn_download_model);
         this.tvInfoGyroscope = findViewById(R.id.tv_info_gyroscope);
         this.tvInfoAccelometer= findViewById(R.id.tv_info_accelometer);
         this.tvInfoLight= findViewById(R.id.tv_info_light);
@@ -91,8 +85,12 @@ public class MainActivity extends AppCompatActivity {
 
         //define onclick event to btn save to server
         btnSaveToServer.setOnClickListener(new SaveToServerListener(this, btnSaveToServer));
-        if(!FileManager.fileExists())
+        if(!FileManager.dataFileExists())
             btnSaveToServer.setEnabled(false);
+
+        //define onclick event to btn download model from server
+        btnDownloadFromServer.setOnClickListener(new LoadModelFromServerListener(this, btnDownloadFromServer));
+
 
         //start collection data
         btnStartCollectData.setOnClickListener(new View.OnClickListener() {
@@ -190,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
                     for (int i = 0; i < rgGroupRadio.getChildCount(); i++) {
                         rgGroupRadio.getChildAt(i).setEnabled(true);
                     }
-                    if(FileManager.fileExists())
+                    if(FileManager.dataFileExists())
                         btnSaveToServer.setEnabled(true);
                     btnStartCollectData.setEnabled(true);
                     //btnStopCollectingData.setEnabled(false);

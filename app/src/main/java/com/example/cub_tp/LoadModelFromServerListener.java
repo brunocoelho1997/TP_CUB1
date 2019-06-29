@@ -1,7 +1,5 @@
 package com.example.cub_tp;
 
-
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
@@ -14,35 +12,25 @@ import android.widget.Toast;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.jcraft.jsch.SftpException;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 
 import static com.example.cub_tp.Config.*;
 
-public class SaveToServerListener implements View.OnClickListener {
-
+public class LoadModelFromServerListener implements View.OnClickListener {
     JSch jSch = null;
     Session session = null;
     Channel channel = null;
     ChannelSftp channelSftp = null;
     Context context;
-    Button btnSaveToServer;
+    Button btnLoadFromServer;
 
-    public SaveToServerListener(Context context, Button btnSaveToServer) {
+    public LoadModelFromServerListener(Context context, Button btnLoadFromServer) {
         this.jSch = new JSch();
         this.context = context;
-        this.btnSaveToServer = btnSaveToServer;
+        this.btnLoadFromServer = btnLoadFromServer;
     }
-
-    @Override
-    public void onClick(View v) {
-        new RetrieveFeedTask(context).execute();
-    }
-
     private void configureSFTPConnection() throws Exception {
 
         boolean result = FileManager.loadFileServerConfigData();
@@ -70,16 +58,25 @@ public class SaveToServerListener implements View.OnClickListener {
         Log.d("STPConnection", "STP Connection: Changed the directory to: " + FileManager.sftWorkingDir);
 
     }
-
-
+    @Override
+    public void onClick(View v) {
+        new LoadModelFromServerListener.RetrieveFeedTask(context).execute();
+    }
     class RetrieveFeedTask extends AsyncTask<String, Void, Void> {
 
         private Context context;
 
-        private boolean fileSent = false;
+        private boolean fileDownloaded = false;
 
         public RetrieveFeedTask(Context context) {
             this.context = context;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            btnLoadFromServer.setEnabled(false);
+
         }
 
         protected Void doInBackground(String... urls) {
@@ -91,39 +88,26 @@ public class SaveToServerListener implements View.OnClickListener {
                         configureSFTPConnection();
                     }catch (Exception e)
                     {
-                        fileSent = false;
+                        fileDownloaded = false;
                     }
+
                 }
 
-                String timeStamp = new SimpleDateFormat("dd_MM_yyyy_HHmmss").format(System.currentTimeMillis());
-                //for csv file
-                String filePathFrom = ANDROID_BASE_FILE_PATH + FILENAME + FILE_EXTENSION;
-                File file = new File(filePathFrom);
-                if(file.exists())
-                {
-                    String filePathTo = FILENAME + timeStamp + FILE_EXTENSION;
-                    channelSftp.put(filePathFrom, filePathTo);
-                    //clear the content of the file (deleting the file)
-                    file.delete();
-                }
 
-                //for arff file
-                filePathFrom = ANDROID_BASE_FILE_PATH + FILENAME + FILE_EXTENSION_ARFF;
-                file = new File(filePathFrom);
-                if(file.exists())
-                {
-                    String filePathTo = FILENAME + timeStamp + FILE_EXTENSION_ARFF;
-                    channelSftp.put(filePathFrom, filePathTo);
-                    //clear the content of the file (deleting the file)
-                    file = new File(filePathFrom);
-                    file.delete();
-                }
+                String filePathFrom = FILENAME_TRAINED_MODEL + FILE_EXTENSION_MODEL;
+                String filePathTo = Config.ANDROID_BASE_FILE_PATH + Config.FILENAME_TRAINED_MODEL + FILE_EXTENSION_MODEL;
 
-                fileSent = true;
-                Log.d("STPConnection", "STP Connection: The file was sent");
+                //File file = new File(filePathFrom);
+                //if(channelSftp.)
+                //{
+                    channelSftp.get(filePathFrom , filePathTo);
+                    fileDownloaded = true;
+                    Log.d("STPConnection", "STP Connection: The file was downloaded to: " + filePathTo);
+                //}
+
 
             }catch (Exception e){
-                fileSent = false;
+                fileDownloaded = false;
                 closeConnection();
                 Log.d("SaveToServerListener", "" + e);
             }
@@ -133,10 +117,10 @@ public class SaveToServerListener implements View.OnClickListener {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            if(fileSent)
+            if(fileDownloaded)
             {
-                btnSaveToServer.setEnabled(false);
-                Toast.makeText(context, "The file was sent", Toast.LENGTH_LONG).show();
+                btnLoadFromServer.setEnabled(true);
+                Toast.makeText(context, "The model was downloaded", Toast.LENGTH_LONG).show();
             }
             else
             {
@@ -154,6 +138,9 @@ public class SaveToServerListener implements View.OnClickListener {
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .show();
             }
+
+            btnLoadFromServer.setEnabled(true);
+
         }
 
         public void closeConnection(){

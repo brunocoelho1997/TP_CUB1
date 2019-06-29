@@ -25,7 +25,7 @@ public class Config {
 
     public static int MIN_VALUES_TO_MEAN_MEDIAN = 10;
     public static int MIN_VALUES_TO_FFT = 16;
-    public static float NOISE = (float) 0.01; //used by gyroscope and accelometer
+    public static float NOISE = (float) 0.09; //used by gyroscope and accelometer
 
     public static final String LIGHT_LOW = "LOW";
     public static final String LIGHT_NORMAL = "NORMAL";

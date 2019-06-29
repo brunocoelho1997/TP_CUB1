@@ -4,9 +4,14 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import java.math.RoundingMode;
+import java.security.Timestamp;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -14,6 +19,7 @@ import java.util.List;
 import static com.example.cub_tp.Config.MIN_VALUES_TO_FFT;
 import static com.example.cub_tp.Config.MIN_VALUES_TO_MEAN_MEDIAN;
 import static com.example.cub_tp.Config.NOISE;
+import static java.lang.System.*;
 
 
 public class MySensorManager extends AppCompatActivity implements SensorEventListener {
@@ -57,7 +63,8 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
 
     private WekaManagement wekaManagement;
 
-
+    //just to print better results
+    private DecimalFormat doubleFormat;
 
     public MySensorManager(SensorManager sensorManager) {
 
@@ -95,6 +102,9 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
         }
 
         this.wekaManagement = new WekaManagement();
+
+        doubleFormat = new DecimalFormat("#.####");
+        doubleFormat.setRoundingMode(RoundingMode.CEILING);
     }
 
     public void startSensors(){
@@ -107,17 +117,113 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
         sensorManager.unregisterListener(MySensorManager.this);
     }
 
+
     //for gyroscope and accelometer
     @Override
     public void onSensorChanged(SensorEvent event) {
 
-        //applyLowPassFilter(linear_acceleration, event);
+
+
+        processEvent(event);
+
+
+    }
+
+    private void processEvent(SensorEvent event) {
 
         boolean accelometerSensorChanged = false;
         boolean gyroscopeSensorChanged = false;
 
         //flag when has values to write in file
         boolean newValuesFftToWrite = false;
+
+        filterData(event, gyroscopeSensorChanged, accelometerSensorChanged);
+
+        processData(newValuesFftToWrite);
+        //if(sensorChanged)
+        //FileManager.saveOnCsvFile();
+
+
+    }
+
+    private void processData(boolean newValuesFftToWrite) {
+        if(listAngularVelocityAccelometer.size() >= MIN_VALUES_TO_FFT)
+        {
+            Log.d("MySensorManager", "lastAccelometerDataProcessed: " + lastAccelometerDataProcessed);
+
+            Fft fft = new Fft(MIN_VALUES_TO_FFT);
+
+            double[] re = new double[MIN_VALUES_TO_FFT];
+            double[] im = new double[MIN_VALUES_TO_FFT];
+            for (int i = 0; i < re.length; i++)
+                re[i] = listAngularVelocityAccelometer.get(i);
+
+            //Log.d("MySensorManager", "log date before fft acc");
+            fft.fft(re, im);
+            //Log.d("MySensorManager", "log date: after fft acc");
+
+            listAngularVelocityAccelometer.clear();
+            lastAccelometerDataProcessed.clear();
+            for(int i = 0; i < re.length; i++)
+                lastAccelometerDataProcessed.add(getAngularVelocity(re[i], im[i]));
+
+            newValuesFftToWrite = true;
+
+        }
+        if(listAngularVelocityGyroscope.size() >= MIN_VALUES_TO_FFT)
+        {
+
+            Log.d("MySensorManager", "lastGyroscopeDataProcessed: " + lastGyroscopeDataProcessed);
+
+            Fft fft = new Fft(MIN_VALUES_TO_FFT);
+
+            double[] re = new double[MIN_VALUES_TO_FFT];
+            double[] im = new double[MIN_VALUES_TO_FFT];
+            for (int i = 0; i < re.length; i++)
+                re[i] = listAngularVelocityGyroscope.get(i);
+
+            //Log.d("MySensorManager", "log date before fft gyro");
+            fft.fft(re, im);
+            //Log.d("MySensorManager", "log date: after fft gyro");
+
+            listAngularVelocityGyroscope.clear();
+            lastGyroscopeDataProcessed.clear();
+            for(int i = 0; i < re.length; i++)
+                lastGyroscopeDataProcessed.add(getAngularVelocity(re[i], im[i]));
+
+            newValuesFftToWrite = true;
+        }
+
+        //TODO: verify this
+        //if(accelometerSensorChanged == false || gyroscopeSensorChanged == false)
+        //return;
+
+        if(newValuesFftToWrite && lastGyroscopeDataProcessed.size() >= MIN_VALUES_TO_FFT && lastAccelometerDataProcessed.size() >= MIN_VALUES_TO_FFT)
+        {
+            //if the AutoMode isn't checked only save the data on the file
+            if(MainActivity.ckAutoMode.isChecked()){
+                String predictedActivity;
+
+                //Log.d("MySensorManager", "log date before predict");
+                //need to send to weka managemnet the getAngularVelocity(reGyroscope[i], imGyroscope[i])
+                predictedActivity = wekaManagement.predict(lastAccelometerDataProcessed,lastGyroscopeDataProcessed, getLightScale());
+                //Log.d("MySensorManager", "log date after predict: " + predictedActivity);
+
+
+                MainActivity.tvActualActivityPredicted.setText("" + predictedActivity);
+            }
+            else
+                FileManager.saveOnArffFile(lastAccelometerDataProcessed,lastGyroscopeDataProcessed, getLightScale(), MainActivity.actualUserActivity.toString());
+
+            //TODO COLOCAR A ESCRITA EM ASINCRONA
+            //TODO: clear do 64 DO FFT remover os 1ºs 32 valores...
+            //TODO: ver o novo noise...
+            //TODO: os 0s... corrigi-los!!!
+            //todo: Uma leitura a cada 2 segundos
+        }
+    }
+
+    private void filterData(SensorEvent event, boolean gyroscopeSensorChanged, boolean accelometerSensorChanged) {
 
         if(event.sensor.getType() == Sensor.TYPE_GYROSCOPE)
         {
@@ -172,7 +278,7 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
                 lastXGyroscopeValuesToMedian.add(mLastXGyroscope);
                 lastYGyroscopeValuesToMedian.add(mLastYGyroscope);
                 lastZGyroscopeValuesToMedian.add(mLastZGyroscope);
-                MainActivity.tvInfoGyroscope.setText("Gyroscope: x= " + mLastXGyroscope + " y= " + mLastYGyroscope + " z= " + mLastZGyroscope);
+                MainActivity.tvInfoGyroscope.setText("Gyroscope: x= " + doubleFormat.format(mLastXGyroscope) + " y= " + doubleFormat.format(mLastYGyroscope) + " z= " + doubleFormat.format(mLastZGyroscope));
             }
             else
                 MainActivity.tvInfoGyroscope.setText("Gyroscope:");
@@ -248,7 +354,7 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
                 lastYAccelometerValuesToMedian.add(lastYAccelometer);
                 lastZAccelometerValuesToMedian.add(lastZAccelometer);
 
-                MainActivity.tvInfoAccelometer.setText("Accelometer: x= " + lastXAccelometer + " y= " + lastYAccelometer + " z= " + lastZAccelometer);
+                MainActivity.tvInfoAccelometer.setText("Accelometer: x= " + doubleFormat.format(lastXAccelometer) + " y= " + doubleFormat.format(lastYAccelometer * 100 ) + " z= " + doubleFormat.format(lastZAccelometer));
             }
             else
                 MainActivity.tvInfoAccelometer.setText("Accelometer: ");
@@ -287,84 +393,6 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
             MainActivity.tvInfoLight.setText("Light: " + mLastLight);
 
         }
-
-        //if(sensorChanged)
-            //FileManager.saveOnCsvFile();
-
-        if(listAngularVelocityAccelometer.size() >= MIN_VALUES_TO_FFT)
-        {
-            Log.d("MySensorManager", "lastAccelometerDataProcessed: " + lastAccelometerDataProcessed);
-
-            Fft fft = new Fft(MIN_VALUES_TO_FFT);
-
-            double[] re = new double[MIN_VALUES_TO_FFT];
-            double[] im = new double[MIN_VALUES_TO_FFT];
-            for (int i = 0; i < re.length; i++)
-                re[i] = listAngularVelocityAccelometer.get(i);
-
-            Log.d("MySensorManager", "log date before fft acc");
-            fft.fft(re, im);
-            Log.d("MySensorManager", "log date: after fft acc");
-
-            listAngularVelocityAccelometer.clear();
-            lastAccelometerDataProcessed.clear();
-            for(int i = 0; i < re.length; i++)
-                lastAccelometerDataProcessed.add(getAngularVelocity(re[i], im[i]));
-
-            newValuesFftToWrite = true;
-
-        }
-        if(listAngularVelocityGyroscope.size() >= MIN_VALUES_TO_FFT)
-        {
-
-            Log.d("MySensorManager", "lastGyroscopeDataProcessed: " + lastGyroscopeDataProcessed);
-
-            Fft fft = new Fft(MIN_VALUES_TO_FFT);
-
-            double[] re = new double[MIN_VALUES_TO_FFT];
-            double[] im = new double[MIN_VALUES_TO_FFT];
-            for (int i = 0; i < re.length; i++)
-                re[i] = listAngularVelocityGyroscope.get(i);
-
-            Log.d("MySensorManager", "log date before fft gyro");
-            fft.fft(re, im);
-            Log.d("MySensorManager", "log date: after fft gyro");
-
-            listAngularVelocityGyroscope.clear();
-            lastGyroscopeDataProcessed.clear();
-            for(int i = 0; i < re.length; i++)
-                lastGyroscopeDataProcessed.add(getAngularVelocity(re[i], im[i]));
-
-            newValuesFftToWrite = true;
-        }
-
-        //TODO: verify this
-        //if(accelometerSensorChanged == false || gyroscopeSensorChanged == false)
-            //return;
-
-        if(newValuesFftToWrite && lastGyroscopeDataProcessed.size() >= MIN_VALUES_TO_FFT && lastAccelometerDataProcessed.size() >= MIN_VALUES_TO_FFT)
-        {
-            //if the AutoMode isn't checked only save the data on the file
-            if(MainActivity.ckAutoMode.isChecked()){
-                String predictedActivity;
-
-                //need to send to weka managemnet the getAngularVelocity(reGyroscope[i], imGyroscope[i])
-                predictedActivity = wekaManagement.predict(lastAccelometerDataProcessed,lastGyroscopeDataProcessed, getLightScale());
-                MainActivity.tvActualActivityPredicted.setText("" + predictedActivity);
-            }
-
-            Log.d("MySensorManager", "log date: before file");
-            FileManager.saveOnArffFile(lastAccelometerDataProcessed,lastGyroscopeDataProcessed, getLightScale(), MainActivity.actualUserActivity.toString());
-            Log.d("MySensorManager", "log date: after file");
-
-
-            //TODO COLOCAR A ESCRITA EM ASINCRONA
-            //TODO: clear do 64 DO FFT remover os 1ºs 32 valores...
-            //TODO: ver o novo noise...
-            //TODO: os 0s... corrigi-los!!!
-            //todo: Uma leitura a cada 2 segundos
-        }
-
     }
 
     public void clearAngularVelocities(){

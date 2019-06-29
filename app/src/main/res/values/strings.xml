@@ -14,4 +14,5 @@
     <string name="permissions_denied_desc">É necessário aceitar as permissões de GPS e armazenamento para poder usar a aplicação. A app vai ser encerrada.</string>
     <string name="server_wrong_data_title">Dados Servidor Errados</string>
     <string name="server_worng_data_desc">Tem de definir os dados do servidor corretamente no ficheiro</string>
+    <string name="download_model">Download Model</string>
 </resources>

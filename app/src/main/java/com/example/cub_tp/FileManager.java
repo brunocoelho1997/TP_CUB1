@@ -36,7 +36,7 @@ public class FileManager {
         this.mySensorManager = mySensorManager;
     }
 
-    public static boolean fileExists(){
+    public static boolean dataFileExists(){
         String finalPathCsv = ANDROID_BASE_FILE_PATH + FILENAME + FILE_EXTENSION;
         File fileCsv = new File(finalPathCsv);
 
@@ -131,10 +131,10 @@ public class FileManager {
 
         header +="@RELATION activityrecognition\n\n";
 
-        for(int i = 1; i <= 64; i++)
+        for(int i = 1; i <= MIN_VALUES_TO_FFT; i++)
             header +="@ATTRIBUTE accelometer" + i + " real\n";
 
-        for(int i = 1; i <= 64; i++)
+        for(int i = 1; i <= MIN_VALUES_TO_FFT; i++)
             header +="@ATTRIBUTE gyroscope" + i + " real\n";
 
         header +="@ATTRIBUTE light {";
