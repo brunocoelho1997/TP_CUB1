@@ -11,7 +11,8 @@ public class Config {
     public static String FILENAME = "tmp";
     public static String FILE_EXTENSION = ".csv";
     public static String FILE_EXTENSION_ARFF = ".arff";
-    public static String FILENAME_TRAINED_MODEL = "trainedModel";
+    public static String FILENAME_TRAINED_MODEL1 = "trainedModel1";
+    public static String FILENAME_TRAINED_MODEL2 = "trainedModel2";
     public static String FILE_EXTENSION_MODEL = ".model";
 
 
@@ -26,6 +27,9 @@ public class Config {
     public static int MIN_VALUES_TO_MEAN_MEDIAN = 10;
     public static int MIN_VALUES_TO_FFT = 16;
     public static float NOISE = (float) 0.09; //used by gyroscope and accelometer
+
+    //some fft values has a group os 0's... Bug on method onSensorChange
+    public static int VALID_NUMBER_OF_ZEROS = 5;
 
     public static final String LIGHT_LOW = "LOW";
     public static final String LIGHT_NORMAL = "NORMAL";

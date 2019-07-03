@@ -90,19 +90,23 @@ public class LoadModelFromServerListener implements View.OnClickListener {
                     {
                         fileDownloaded = false;
                     }
-
                 }
 
+                String filePathFromModel1 = FILENAME_TRAINED_MODEL1 + FILE_EXTENSION_MODEL;
+                String filePathToModel1 = Config.ANDROID_BASE_FILE_PATH + Config.FILENAME_TRAINED_MODEL1 + FILE_EXTENSION_MODEL;
 
-                String filePathFrom = FILENAME_TRAINED_MODEL + FILE_EXTENSION_MODEL;
-                String filePathTo = Config.ANDROID_BASE_FILE_PATH + Config.FILENAME_TRAINED_MODEL + FILE_EXTENSION_MODEL;
+                String filePathFromModel2 = FILENAME_TRAINED_MODEL2 + FILE_EXTENSION_MODEL;
+                String filePathToModel2 = Config.ANDROID_BASE_FILE_PATH + Config.FILENAME_TRAINED_MODEL2 + FILE_EXTENSION_MODEL;
 
                 //File file = new File(filePathFrom);
                 //if(channelSftp.)
                 //{
-                    channelSftp.get(filePathFrom , filePathTo);
-                    fileDownloaded = true;
-                    Log.d("STPConnection", "STP Connection: The file was downloaded to: " + filePathTo);
+                channelSftp.get(filePathFromModel1 , filePathToModel1);
+                channelSftp.get(filePathFromModel2 , filePathToModel2);
+
+                fileDownloaded = true;
+
+                Log.d("STPConnection", "STP Connection: The file was downloaded to: " + filePathToModel1 +" and " + filePathFromModel2);
                 //}
 
 

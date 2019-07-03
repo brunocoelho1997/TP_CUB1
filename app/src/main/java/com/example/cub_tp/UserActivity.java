@@ -5,5 +5,6 @@ public enum UserActivity {
     WALKING_UPSTAIRS,
     WALKING_DOWNSTAIRS,
     SITTING,
-    LAYING
+    LAYING,
+    UNIFIED
 }

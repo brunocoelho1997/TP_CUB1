@@ -26,5 +26,4 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'com.jcraft:jsch:0.1.54'
-    implementation files('libs/weka_3_7_13_mobile.jar')
 }
