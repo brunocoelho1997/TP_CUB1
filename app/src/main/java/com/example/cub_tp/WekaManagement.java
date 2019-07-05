@@ -140,8 +140,8 @@ public class WekaManagement {
 
     private List<String> getActivitiesList() {
         List<String> activities = new ArrayList<>();
-        activities.add(UserActivity.LAYING.name());
         activities.add(UserActivity.WALKING.name());
+        activities.add(UserActivity.LAYING.name());
         activities.add(UserActivity.UNIFIED.name());
         return activities;
     }

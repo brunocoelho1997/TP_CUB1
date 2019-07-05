@@ -726,7 +726,7 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
     private void processData(boolean newValuesFftToWrite) {
         if(listAngularVelocityAccelometer.size() >= MIN_VALUES_TO_FFT)
         {
-            Log.d("MySensorManager", "lastAccelometerDataProcessed: " + lastAccelometerDataProcessed);
+            //Log.d("MySensorManager", "lastAccelometerDataProcessed: " + lastAccelometerDataProcessed);
 
             Fft fft = new Fft(MIN_VALUES_TO_FFT);
 
@@ -739,10 +739,20 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
             fft.fft(re, im);
             //Log.d("MySensorManager", "log date: after fft acc");
 
-            listAngularVelocityAccelometer.clear();
-            lastAccelometerDataProcessed.clear();
+
+            ArrayList<Float> dataProcessedTmp = new ArrayList<>();
             for(int i = 0; i < re.length; i++)
-                lastAccelometerDataProcessed.add(getAngularVelocity(re[i], im[i]));
+                dataProcessedTmp.add(getAngularVelocity(re[i], im[i]));
+            if(hasZerosOnProcessedData(dataProcessedTmp))
+            {
+                //Log.d("MySensorManager", "Found a list of 0's. Will not save on file neither predict the activity.");
+                listAngularVelocityAccelometer.clear();
+                return;
+            }
+
+
+            listAngularVelocityAccelometer.clear();
+            lastAccelometerDataProcessed = new ArrayList<>(dataProcessedTmp);
 
             newValuesFftToWrite = true;
 
@@ -750,7 +760,7 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
         if(listAngularVelocityGyroscope.size() >= MIN_VALUES_TO_FFT)
         {
 
-            Log.d("MySensorManager", "lastGyroscopeDataProcessed: " + lastGyroscopeDataProcessed);
+            //Log.d("MySensorManager", "lastGyroscopeDataProcessed: " + lastGyroscopeDataProcessed);
 
             Fft fft = new Fft(MIN_VALUES_TO_FFT);
 
@@ -763,11 +773,18 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
             fft.fft(re, im);
             //Log.d("MySensorManager", "log date: after fft gyro");
 
-            listAngularVelocityGyroscope.clear();
-            lastGyroscopeDataProcessed.clear();
+            ArrayList<Float> dataProcessedTmp = new ArrayList<>();
             for(int i = 0; i < re.length; i++)
-                lastGyroscopeDataProcessed.add(getAngularVelocity(re[i], im[i]));
+                dataProcessedTmp.add(getAngularVelocity(re[i], im[i]));
+            if(hasZerosOnProcessedData(dataProcessedTmp))
+            {
+                //Log.d("MySensorManager", "Found a list of 0's. Will not save on file neither predict the activity.");
+                listAngularVelocityGyroscope.clear();
+                return;
+            }
 
+            listAngularVelocityGyroscope.clear();
+            lastGyroscopeDataProcessed = new ArrayList<>(dataProcessedTmp);
             newValuesFftToWrite = true;
         }
 
@@ -798,6 +815,21 @@ public class MySensorManager extends AppCompatActivity implements SensorEventLis
             //TODO: os 0s... corrigi-los!!!
             //todo: Uma leitura a cada 2 segundos
         }
+    }
+
+    private boolean hasZerosOnProcessedData(ArrayList<Float> lastDataProcessed) {
+        int numberOfZeros = 0;
+        for(Float tmp : lastDataProcessed)
+        {
+            if((float)tmp == 0)
+                numberOfZeros++;
+            else
+                numberOfZeros = 0;
+
+            if(numberOfZeros > Config.VALID_NUMBER_OF_ZEROS)
+                return true;
+        }
+        return false;
     }
 
     private void filterData(SensorEvent event, boolean gyroscopeSensorChanged, boolean accelometerSensorChanged) {
