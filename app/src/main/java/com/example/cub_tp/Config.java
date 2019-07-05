@@ -27,9 +27,13 @@ public class Config {
     public static int MIN_VALUES_TO_MEAN_MEDIAN = 10;
     public static int MIN_VALUES_TO_FFT = 16;
     public static float NOISE = (float) 0.09; //used by gyroscope and accelometer
+    public static double MIN_ACCURACY_TO_PREDICT = 0.9;
 
     //some fft values has a group os 0's... Bug on method onSensorChange
     public static int VALID_NUMBER_OF_ZEROS = 5;
+    public static String WEAK_PREDICT_MESSAGE = "The system cannot predicted the activity";
+
+
 
     public static final String LIGHT_LOW = "LOW";
     public static final String LIGHT_NORMAL = "NORMAL";

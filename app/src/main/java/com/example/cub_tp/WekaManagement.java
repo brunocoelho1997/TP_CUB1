@@ -103,7 +103,20 @@ public class WekaManagement {
             dataUnlabeled.setClassIndex(dataUnlabeled.numAttributes() - 1);
             double classif = cl.classifyInstance(dataUnlabeled.firstInstance());
 
+            //get the prediction percentage or distribution
+            double[] percentages=cl.distributionForInstance(dataUnlabeled.firstInstance());
+            double accuracy = percentages[(int) classif];
+
+
+            if(accuracy < Config.MIN_ACCURACY_TO_PREDICT)
+                return Config.WEAK_PREDICT_MESSAGE;
+
             Log.d("WekaManagement", "WekaManagement: " +  inst.classValue() + " -> " + classif);
+            Log.d("WekaManagement", "Distribution (the accuracy):" +  accuracy);
+
+
+
+
 
             return getActivitiesList().get((int) classif);
 
